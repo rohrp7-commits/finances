@@ -198,6 +198,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .cat-bc-sep{font-size:12px;color:var(--text3);}
 .cat-bc-cur{font-size:12px;color:var(--text2);font-weight:700;}
 
+/* IMPORT IA */
+#import-ia-overlay.open{display:flex!important;animation:fadeInIA .18s ease;}
+@keyframes fadeInIA{from{opacity:0}to{opacity:1}}
+@keyframes spinIA{to{transform:rotate(360deg)}}
+.rascunho-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:14px;transition:border-color .2s;}
+.rascunho-card.confirmado{border-color:rgba(45,216,112,.4);background:rgba(45,216,112,.04);}
+.rascunho-select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;margin-top:8px;appearance:none;-webkit-appearance:none;}
+
 /* EXTRATO FULL SCREEN */
 #extrato-full{transform:translateX(100%);}
 #extrato-full.open{display:flex!important;transform:translateX(0);animation:slideInRight .22s cubic-bezier(.25,.46,.45,.94);}
@@ -405,6 +413,10 @@ select option{background:var(--bg3);}
 <main class="main">
   <div class="topbar">
     <div><div class="topbar-title" id="topbar-title">Início</div><div class="topbar-sub" id="topbar-sub">Visão geral das suas finanças</div></div>
+    <button onclick="abrirImportIA()" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:99px;border:1px solid rgba(212,168,75,.35);background:rgba(212,168,75,.08);color:var(--gold);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Importar com IA
+    </button>
     </div>
 
   <!-- INÍCIO -->
@@ -565,6 +577,7 @@ select option{background:var(--bg3);}
     <button class="acao-btn-mob" onclick="abrirModal('despesa')"><div class="aicon d"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><span class="alabel">Despesa</span></button>
     <button class="acao-btn-mob" onclick="abrirModal('receita')"><div class="aicon r"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><span class="alabel">Receita</span></button>
     <button class="acao-btn-mob" onclick="abrirModal('transferencia')"><div class="aicon t"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg></div><span class="alabel">Transf.</span></button>
+    <button class="acao-btn-mob" onclick="abrirImportIA()" style="border-color:rgba(212,168,75,.3);background:rgba(212,168,75,.06)"><div class="aicon" style="background:rgba(212,168,75,.15);color:var(--gold)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><span class="alabel" style="color:var(--gold)">Importar</span></button>
   </div>
   <!-- Filtros mobile -->
   <div style="padding:12px 14px 0;display:flex;gap:8px;flex-wrap:wrap;">
@@ -1942,6 +1955,235 @@ Promise.all([carregarCategorias(),carregarMetas(),carregarSaldos()]).then(()=>ca
   <!-- Lista -->
   <div id="extrato-full-lista" style="flex:1;overflow-y:auto;padding:8px 0 24px;"></div>
 </div>
+
+<!-- IMPORTAR COM IA -->
+<div id="import-ia-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:12px;padding:18px 16px 0;flex-shrink:0;border-bottom:1px solid var(--border);padding-bottom:16px;">
+    <button onclick="fecharImportIA()" style="background:var(--bg3);border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div style="flex:1">
+      <div style="font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px">Importar com IA</div>
+      <div style="font-size:11px;color:var(--text3);font-weight:500" id="import-ia-sub">Suba o extrato do seu banco</div>
+    </div>
+    <div id="import-ia-progresso" style="display:none;font-size:11px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace"></div>
+  </div>
+
+  <!-- STEP 1: Upload -->
+  <div id="import-step-1" style="flex:1;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:16px;">
+    <div style="background:rgba(212,168,75,.06);border:1.5px dashed rgba(212,168,75,.35);border-radius:20px;padding:36px 20px;text-align:center;cursor:pointer;" onclick="document.getElementById('import-file-input').click()">
+      <div style="font-size:40px;margin-bottom:12px">📄</div>
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">Toque para selecionar</div>
+      <div style="font-size:12px;color:var(--text3)">Foto, print ou PDF do extrato bancário</div>
+      <div style="margin-top:14px;display:inline-flex;gap:8px;">
+        <span style="background:var(--bg3);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--text3)">JPG</span>
+        <span style="background:var(--bg3);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--text3)">PNG</span>
+        <span style="background:var(--bg3);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--text3)">PDF</span>
+      </div>
+    </div>
+    <input type="file" id="import-file-input" accept="image/*,.pdf" style="display:none" onchange="importArquivoSelecionado(this)">
+    <div id="import-preview" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;align-items:center;gap:12px;">
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(212,168,75,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;" id="import-file-icon">📄</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="import-file-nome"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;" id="import-file-tam"></div>
+      </div>
+      <button onclick="limparImportArquivo()" style="background:none;border:none;cursor:pointer;color:var(--text3);">✕</button>
+    </div>
+    <button id="import-btn-processar" onclick="processarComIA()" disabled style="width:100%;padding:16px;border-radius:99px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:not-allowed;text-transform:uppercase;letter-spacing:.8px;background:var(--bg3);color:var(--text3);transition:all .2s;">
+      Processar com IA
+    </button>
+  </div>
+
+  <!-- STEP 2: Processando -->
+  <div id="import-step-2" style="display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:40px 20px;text-align:center;">
+    <div style="width:64px;height:64px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--gold);animation:spinIA .9s linear infinite;"></div>
+    <div>
+      <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:6px" id="import-ia-status">Analisando extrato...</div>
+      <div style="font-size:12px;color:var(--text3)">A IA está lendo os lançamentos</div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Revisar -->
+  <div id="import-step-3" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+    <div style="padding:14px 16px 10px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)" id="import-resumo-count"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Defina conta e categoria de cada um</div>
+      </div>
+      <button onclick="confirmarTodosImport()" id="btn-confirmar-todos" style="padding:9px 16px;border-radius:99px;border:none;background:var(--green);color:#080808;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">Salvar todos</button>
+    </div>
+    <div id="import-lista-rascunhos" style="flex:1;overflow-y:auto;padding:10px 12px 100px;display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+
+  <!-- STEP 4: Sucesso -->
+  <div id="import-step-4" style="display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:40px 20px;text-align:center;">
+    <div style="font-size:56px">✅</div>
+    <div>
+      <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px" id="import-sucesso-txt">Lançamentos importados!</div>
+      <div style="font-size:13px;color:var(--text3)">Tudo salvo no seu extrato</div>
+    </div>
+    <button onclick="fecharImportIA()" style="margin-top:10px;padding:14px 32px;border-radius:99px;border:none;background:var(--green);color:#080808;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;">Concluir</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// IMPORTAR COM IA (Gemini via Vercel Function)
+// ============================================================
+let importArquivo=null, importRascunhos=[];
+
+function abrirImportIA(){
+  importArquivo=null;importRascunhos=[];
+  importMostrarStep(1);
+  const el=document.getElementById("import-ia-overlay");
+  el.style.display="flex";
+  requestAnimationFrame(()=>el.classList.add("open"));
+  document.body.style.overflow="hidden";
+}
+function fecharImportIA(){
+  const el=document.getElementById("import-ia-overlay");
+  el.classList.remove("open");
+  el.style.opacity="0";el.style.transition="opacity .18s";
+  setTimeout(()=>{el.style.display="none";el.style.opacity="";el.style.transition="";},200);
+  document.body.style.overflow="";
+}
+function importMostrarStep(n){
+  [1,2,3,4].forEach(i=>{
+    const el=document.getElementById("import-step-"+i);
+    if(el)el.style.display=(i===n)?"flex":"none";
+  });
+  const subs={1:"Suba o extrato do seu banco",2:"Aguarde enquanto a IA analisa...",3:"Revise e confirme os lançamentos",4:"Importação concluída"};
+  document.getElementById("import-ia-sub").textContent=subs[n]||"";
+}
+function importArquivoSelecionado(input){
+  const file=input.files[0];if(!file)return;
+  importArquivo=file;
+  const preview=document.getElementById("import-preview");
+  document.getElementById("import-file-nome").textContent=file.name;
+  document.getElementById("import-file-tam").textContent=(file.size/1024).toFixed(0)+" KB";
+  document.getElementById("import-file-icon").textContent=file.type.includes("pdf")?"📄":"🖼️";
+  preview.style.display="flex";
+  const btn=document.getElementById("import-btn-processar");
+  btn.disabled=false;btn.style.background="var(--gold)";btn.style.color="#080808";btn.style.cursor="pointer";
+}
+function limparImportArquivo(){
+  importArquivo=null;
+  document.getElementById("import-file-input").value="";
+  document.getElementById("import-preview").style.display="none";
+  const btn=document.getElementById("import-btn-processar");
+  btn.disabled=true;btn.style.background="var(--bg3)";btn.style.color="var(--text3)";btn.style.cursor="not-allowed";
+}
+async function processarComIA(){
+  if(!importArquivo)return;
+  importMostrarStep(2);
+  try{
+    const base64=await new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result.split(",")[1]);
+      r.onerror=()=>rej(new Error("Erro ao ler arquivo"));
+      r.readAsDataURL(importArquivo);
+    });
+    document.getElementById("import-ia-status").textContent="Extraindo lançamentos...";
+    const resp=await fetch("/api/import",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({imageData:base64,mediaType:importArquivo.type||"image/jpeg"})
+    });
+    if(!resp.ok)throw new Error("Erro na API: "+resp.status);
+    const data=await resp.json();
+    if(data.erro)throw new Error(data.erro);
+    importRascunhos=(data.lancamentos||[]).map((l,i)=>({...l,id:i,confirmado:false,pulado:false,conta:"",categoria:""}));
+    if(importRascunhos.length===0)throw new Error("Nenhum lançamento encontrado");
+    renderRascunhos();
+    importMostrarStep(3);
+    document.getElementById("import-resumo-count").textContent=importRascunhos.length+" lançamento"+(importRascunhos.length>1?"s":"")+" encontrado"+(importRascunhos.length>1?"s":"");
+  }catch(err){
+    importMostrarStep(1);
+    showToast("Erro: "+err.message,true);
+  }
+}
+function getCatsOptions(valorAtual=""){
+  const fixas=[{categoria:"Compras Mensais",subcategorias:["Supermercado","Padaria","Higiene Pessoal","Restaurante","Cafeteria e Lanchonete"]}];
+  let opts=`<option value="">Sem categoria</option>`;
+  [...fixas,...todasCategorias].forEach(cat=>{
+    opts+=`<optgroup label="${cat.categoria}">`;
+    (cat.subcategorias||[]).forEach(sub=>{
+      const v=cat.categoria+" - "+sub;
+      opts+=`<option value="${v}"${valorAtual===v?" selected":""}>${sub}</option>`;
+    });
+    opts+=`</optgroup>`;
+  });
+  return opts;
+}
+function renderRascunhos(){
+  const lista=document.getElementById("import-lista-rascunhos");
+  const MA=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  lista.innerHTML=importRascunhos.map((l,i)=>{
+    if(l.pulado)return`<div class="rascunho-card" style="opacity:.4;display:flex;align-items:center;gap:10px;padding:10px 14px;">
+      <span style="font-size:11px;color:var(--text3)">Ignorado: ${l.descricao}</span>
+      <button onclick="importDesIgnorar(${i})" style="margin-left:auto;font-size:10px;color:var(--gold);background:none;border:none;cursor:pointer;font-weight:700">Desfazer</button>
+    </div>`;
+    const d=new Date(l.data+"T00:00:00");
+    const dataFmt=`${d.getDate()} ${MA[d.getMonth()]}`;
+    const isRec=l.tipo==="credito";
+    const cor=isRec?"var(--green)":"var(--red)";
+    return`<div class="rascunho-card${l.confirmado?" confirmado":""}" id="rascunho-${i}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+            <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600">${dataFmt}</span>
+            <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;background:${isRec?"rgba(45,216,112,.12)":"rgba(255,92,92,.12)"};color:${cor}">${isRec?"RECEITA":"DESPESA"}</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.descricao}</div>
+          <div style="font-size:16px;font-weight:800;color:${cor};font-family:'DM Mono',monospace;margin-top:2px;">${isRec?"+":"-"} R$ ${parseFloat(l.valor).toFixed(2).replace(".",",")}</div>
+        </div>
+        ${l.confirmado
+          ?`<div style="width:30px;height:30px;border-radius:50%;background:rgba(45,216,112,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>`
+          :`<button onclick="importIgnorar(${i})" style="width:30px;height:30px;border-radius:50%;background:var(--bg3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);flex-shrink:0;">✕</button>`
+        }
+      </div>
+      ${!l.confirmado?`
+      <select class="rascunho-select" onchange="importSetConta(${i},this.value)">
+        <option value="">Selecionar conta...</option>
+        ${CONTAS_DEF.map(c=>`<option value="${c.nome}"${l.conta===c.nome?" selected":""}>${c.nome}</option>`).join("")}
+      </select>
+      <select class="rascunho-select" onchange="importSetCat(${i},this.value)">${getCatsOptions(l.categoria)}</select>
+      <button onclick="importConfirmarUm(${i})" style="width:100%;margin-top:10px;padding:11px;border-radius:99px;border:none;background:var(--gold);color:#080808;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800;cursor:pointer;">✓ Confirmar este</button>`
+      :`<div style="margin-top:8px;font-size:11px;color:var(--green);font-weight:600;">✓ Confirmado · ${l.conta||"sem conta"}</div>`}
+    </div>`;
+  }).join("");
+}
+function importSetConta(i,val){importRascunhos[i].conta=val;}
+function importSetCat(i,val){importRascunhos[i].categoria=val;}
+function importIgnorar(i){importRascunhos[i].pulado=true;renderRascunhos();}
+function importDesIgnorar(i){importRascunhos[i].pulado=false;renderRascunhos();}
+async function importConfirmarUm(i){
+  const l=importRascunhos[i];if(!l||l.pulado)return;
+  const catFinal=l.tipo==="credito"?(l.categoria||"receita"):l.categoria||"";
+  try{
+    await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(l.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
+    importRascunhos[i].confirmado=true;renderRascunhos();
+  }catch(e){showToast("Erro ao salvar.",true);}
+}
+async function confirmarTodosImport(){
+  const btn=document.getElementById("btn-confirmar-todos");
+  btn.disabled=true;btn.textContent="Salvando...";
+  const pendentes=importRascunhos.filter(l=>!l.confirmado&&!l.pulado);
+  let salvos=0;
+  for(const l of pendentes){
+    const catFinal=l.tipo==="credito"&&!l.categoria.startsWith("receita")?"receita":l.categoria||"";
+    try{
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(l.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
+      l.confirmado=true;salvos++;
+      const prog=document.getElementById("import-ia-progresso");
+      prog.style.display="block";prog.textContent=salvos+"/"+pendentes.length;
+    }catch(e){}
+  }
+  document.getElementById("import-sucesso-txt").textContent=salvos+" lançamento"+(salvos!==1?"s":"")+" importado"+(salvos!==1?"s":"")+"!";
+  importMostrarStep(4);carregarDados();
+}
+</script>
 
 </body>
 </html>
