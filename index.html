@@ -2155,6 +2155,7 @@ function renderRascunhos(){
         }
       </div>
       ${!l.confirmado?`
+      <input type="text" class="rascunho-select" value="${l.descricao}" oninput="importSetDesc(${i},this.value)" placeholder="Descrição" style="outline:none;">
       <select class="rascunho-select" onchange="importSetConta(${i},this.value)">
         <option value="">Selecionar conta...</option>
         ${CONTAS_DEF.map(c=>`<option value="${c.nome}"${l.conta===c.nome?" selected":""}>${c.nome}</option>`).join("")}
@@ -2165,6 +2166,7 @@ function renderRascunhos(){
     </div>`;
   }).join("");
 }
+function importSetDesc(i,val){importRascunhos[i].descricao=val;}
 function importSetConta(i,val){importRascunhos[i].conta=val;}
 function importSetCat(i,val){importRascunhos[i].categoria=val;}
 function importIgnorar(i){importRascunhos[i].pulado=true;renderRascunhos();}
