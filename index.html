@@ -1483,15 +1483,26 @@ function gerarExtratoHTML(dados){
   let html="";
   // Agendamentos primeiro (datas futuras)
   if(agendados.length>0){
-    html+=`<div style="padding:10px 20px 6px;display:flex;align-items:center;gap:8px;">
+    const agAberto=window._agendAberto||false;
+    html+=`<div onclick="toggleAgendamentos()" style="padding:12px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;background:rgba(212,168,75,.04);border-bottom:1px solid rgba(212,168,75,.15);user-select:none;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px">Agendamentos pendentes · ${agendados.length}</span>
+      <span style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;flex:1">Agendamentos pendentes · ${agendados.length}</span>
+      <svg style="transition:transform .2s;transform:rotate(${agAberto?'180':'0'}deg)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>`;
-    html+=renderGrupos(agendados,true);
+    if(agAberto){
+      html+=`<div id="agend-lista">`;
+      html+=renderGrupos(agendados,true);
+      html+=`</div>`;
+    }
     if(normais.length>0)html+=`<div style="height:1px;background:var(--border2);margin:4px 0"></div>`;
   }
   html+=renderGrupos(normais,false);
   return html;
+}
+
+function toggleAgendamentos(){
+  window._agendAberto=!window._agendAberto;
+  renderExtrato();
 }
 
 // GRÁFICOS
