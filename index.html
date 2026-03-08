@@ -371,7 +371,44 @@ select option{background:var(--bg3);}
 </style>
 </head>
 <body>
-<div class="app-shell">
+
+<!-- TELA DE LOGIN -->
+<div id="login-screen" style="display:flex;position:fixed;inset:0;background:#080808;z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:0;">
+  <div style="width:100%;max-width:380px;padding:0 24px;">
+    <div style="text-align:center;margin-bottom:36px;">
+      <div style="font-size:28px;font-weight:900;color:#f5f5f5;letter-spacing:-.5px;font-family:'Plus Jakarta Sans',sans-serif;">Minhas Finanças</div>
+      <div style="font-size:13px;color:#666;margin-top:6px;font-family:'Plus Jakarta Sans',sans-serif;">Entre com sua conta para continuar</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.8px;font-family:'Plus Jakarta Sans',sans-serif;display:block;margin-bottom:6px;">Email</label>
+        <input id="login-email" type="email" placeholder="seu@email.com" autocomplete="email"
+          style="width:100%;background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:14px 16px;color:#f5f5f5;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
+          onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
+          onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.8px;font-family:'Plus Jakarta Sans',sans-serif;display:block;margin-bottom:6px;">Senha</label>
+        <div style="position:relative;">
+          <input id="login-senha" type="password" placeholder="••••••••" autocomplete="current-password"
+            style="width:100%;background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:14px 48px 14px 16px;color:#f5f5f5;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
+            onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
+            onkeydown="if(event.key==='Enter')fazerLogin()">
+          <button onclick="toggleSenhaVis()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#666;padding:4px;" id="btn-olho">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="login-erro" style="display:none;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);border-radius:10px;padding:10px 14px;font-size:12px;color:#ff5c5c;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:center;"></div>
+      <button onclick="fazerLogin()" id="login-btn"
+        style="width:100%;padding:15px;border-radius:99px;border:none;background:#2dd870;color:#080808;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px;transition:opacity .2s;letter-spacing:.3px;">
+        Entrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell" id="app-shell" style="display:none;">
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -1052,7 +1089,7 @@ function mostrarStatus(msg,tipo){const el=document.getElementById("status");el.t
 function popularSelectCategorias(){
   const sel=document.getElementById("categoria");
   sel.innerHTML='<option value="" disabled selected>Selecione a categoria</option>';
-  const fixas=[{categoria:"Compras Mensais",subcategorias:["Supermercado","Padaria","Guloseimas e Doces","Supermercado Esporádico","Higiene Pessoal","Restaurante","Cafeteria e Lanchonete"]}];
+  const fixas=[{categoria:"Supermercado",subcategorias:["Alimentos","Padaria","Feira / Hortifruti","Limpeza Doméstica","Extras & Supérfluos"]},{categoria:"Casa",subcategorias:["Água","Luz","Internet","Manutenção","IPTU","Gás","Utensílios & Casa"]},{categoria:"Pessoal",subcategorias:["Higiene","Vestuário","Lazer & Saídas","Saúde","Beleza & Estética","Apoio Familiar","Presentes","Diversos"]},{categoria:"Educação",subcategorias:["Livros e Materiais","Escola e Faculdade"]},{categoria:"Transporte",subcategorias:["IPVA","Multas","Combustível","Uber","Fretes Diversos","Manutenção","Estacionamento","Limpeza"]},{categoria:"Pet",subcategorias:["Banho e Tosa","Alimentação","Veterinário","Medicamentos","Acessórios"]}];
   [...fixas,...todasCategorias].forEach(cat=>{
     if(cat.subcategorias&&cat.subcategorias.length>0){
       const grp=document.createElement("optgroup");grp.label=cat.categoria;
@@ -1806,7 +1843,7 @@ function popularSelectOrcamento(){
   if(!sel)return;
   sel.innerHTML='<option value="" disabled selected>Selecione a categoria</option>';
   // Todas categorias disponíveis (fixas + customizadas) excluindo as que já têm orçamento
-  const fixas=["Compras Mensais"];
+  const fixas=["Supermercado","Casa","Pessoal","Educação","Transporte","Pet"];
   const todas=[...fixas,...todasCategorias.map(c=>c.categoria)];
   const disponiveis=todas.filter(c=>!metas[c]);
   disponiveis.forEach(c=>{
@@ -1883,7 +1920,7 @@ function excluirOrcamento(){
 
 // CATEGORIAS
 function buildCatsHTML(target){
-  const fixas=[{categoria:"Compras Mensais",subcategorias:["Supermercado","Padaria","Guloseimas e Doces","Supermercado Esporádico","Higiene Pessoal","Restaurante","Cafeteria e Lanchonete"]}];
+  const fixas=[{categoria:"Supermercado",subcategorias:["Alimentos","Padaria","Feira / Hortifruti","Limpeza Doméstica","Extras & Supérfluos"]},{categoria:"Casa",subcategorias:["Água","Luz","Internet","Manutenção","IPTU","Gás","Utensílios & Casa"]},{categoria:"Pessoal",subcategorias:["Higiene","Vestuário","Lazer & Saídas","Saúde","Beleza & Estética","Apoio Familiar","Presentes","Diversos"]},{categoria:"Educação",subcategorias:["Livros e Materiais","Escola e Faculdade"]},{categoria:"Transporte",subcategorias:["IPVA","Multas","Combustível","Uber","Fretes Diversos","Manutenção","Estacionamento","Limpeza"]},{categoria:"Pet",subcategorias:["Banho e Tosa","Alimentação","Veterinário","Medicamentos","Acessórios"]}];
   return[...fixas,...todasCategorias].map((cat,ci)=>{
     const isFixa=ci<fixas.length;
     let html=`<div class="cat-group"><div class="cat-group-header"><span class="cat-group-name">${cat.categoria}</span>${isFixa?'<span style="font-size:11px;color:var(--text3)">Padrão</span>':`<button class="btn-del" onclick="deletarCategoria('${cat.categoria}','${target}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`}</div>`;
@@ -1923,7 +1960,9 @@ function deletarSubcategoria(cat,sub,target){
 
 // INIT
 initLayout();
-Promise.all([carregarCategorias(),carregarMetas(),carregarSaldos()]).then(()=>carregarDados());
+function iniciarApp(){
+  Promise.all([carregarCategorias(),carregarMetas(),carregarSaldos()]).then(()=>carregarDados());
+}
 </script>
 <!-- EXTRATO FULL SCREEN (MOBILE) -->
 <div id="extrato-full" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;flex-direction:column;">
@@ -2037,10 +2076,54 @@ Promise.all([carregarCategorias(),carregarMetas(),carregarSaldos()]).then(()=>ca
     <button onclick="fecharImportIA()" style="margin-top:10px;padding:14px 32px;border-radius:99px;border:none;background:var(--green);color:#080808;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;">Concluir</button>
   </div>
 </div>
+</div><!-- fecha app-shell -->
 
 <script>
 // ============================================================
-// IMPORTAR COM IA (Gemini via Vercel Function)
+// LOGIN
+// ============================================================
+function toggleSenhaVis(){
+  const input=document.getElementById('login-senha');
+  input.type=input.type==='password'?'text':'password';
+}
+async function fazerLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const senha=document.getElementById('login-senha').value;
+  const btn=document.getElementById('login-btn');
+  const erro=document.getElementById('login-erro');
+  if(!email||!senha){mostrarErroLogin('Preencha email e senha.');return;}
+  btn.textContent='Entrando...';btn.style.opacity='.7';btn.disabled=true;
+  erro.style.display='none';
+  try{
+    const resp=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
+    const data=await resp.json();
+    if(data.ok){
+      sessionStorage.setItem('fin_auth',data.token);
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app-shell').style.display='';
+      iniciarApp();
+    } else {
+      mostrarErroLogin(data.erro||'Email ou senha incorretos.');
+    }
+  }catch(e){
+    mostrarErroLogin('Erro de conexão. Tente novamente.');
+  }
+  btn.textContent='Entrar';btn.style.opacity='1';btn.disabled=false;
+}
+function mostrarErroLogin(msg){
+  const el=document.getElementById('login-erro');
+  el.textContent=msg;el.style.display='block';
+}
+function verificarSessao(){
+  const token=sessionStorage.getItem('fin_auth');
+  if(token){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-shell').style.display='';
+    iniciarApp();
+  }
+}
+window.addEventListener('DOMContentLoaded',verificarSessao);
+
 // ============================================================
 let importArquivo=null, importRascunhos=[];
 
@@ -2115,7 +2198,7 @@ async function processarComIA(){
   }
 }
 function getCatsOptions(valorAtual=""){
-  const fixas=[{categoria:"Compras Mensais",subcategorias:["Supermercado","Padaria","Higiene Pessoal","Restaurante","Cafeteria e Lanchonete"]}];
+  const fixas=[{categoria:"Supermercado",subcategorias:["Alimentos","Padaria","Feira / Hortifruti","Limpeza Doméstica","Extras & Supérfluos"]},{categoria:"Casa",subcategorias:["Água","Luz","Internet","Manutenção","IPTU","Gás","Utensílios & Casa"]},{categoria:"Pessoal",subcategorias:["Higiene","Vestuário","Lazer & Saídas","Saúde","Beleza & Estética","Apoio Familiar","Presentes","Diversos"]},{categoria:"Educação",subcategorias:["Livros e Materiais","Escola e Faculdade"]},{categoria:"Transporte",subcategorias:["IPVA","Multas","Combustível","Uber","Fretes Diversos","Manutenção","Estacionamento","Limpeza"]},{categoria:"Pet",subcategorias:["Banho e Tosa","Alimentação","Veterinário","Medicamentos","Acessórios"]}];
   let opts=`<option value="">Sem categoria</option>`;
   [...fixas,...todasCategorias].forEach(cat=>{
     opts+=`<optgroup label="${cat.categoria}">`;
