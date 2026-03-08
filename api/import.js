@@ -1,5 +1,12 @@
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '20mb',
+    },
+  },
+};
+
 export default async function handler(req, res) {
-  // Só aceita POST
   if (req.method !== 'POST') {
     return res.status(405).json({ erro: 'Método não permitido' });
   }
@@ -12,8 +19,10 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ erro: 'API key não configurada' });
+    return res.status(500).json({ erro: 'API key não configurada no servidor' });
   }
+
+  const mime = (mediaType && mediaType !== 'application/octet-stream') ? mediaType : 'application/pdf';
 
   const prompt = `Você é um assistente financeiro. Analise este extrato bancário e extraia TODOS os lançamentos.
 
@@ -23,51 +32,60 @@ Retorne APENAS um JSON válido, sem texto antes ou depois, sem markdown, no form
 Regras:
 - data: formato YYYY-MM-DD obrigatório
 - valor: número positivo sem sinal
-- tipo: "debito" para saídas/gastos, "credito" para entradas/receitas
-- descricao: nome limpo do estabelecimento
+- tipo: "debito" para saídas/gastos/pagamentos, "credito" para entradas/receitas/depósitos
+- descricao: nome limpo do estabelecimento ou descrição
 - Ignore saldo, totais, cabeçalhos — apenas transações individuais
-- Se o ano não aparecer, use ${new Date().getFullYear()}`;
+- Se o ano não aparecer, use ${new Date().getFullYear()}
+- Retorne APENAS o JSON, nada mais`;
 
   try {
     const geminiResp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{
             parts: [
-              { inline_data: { mime_type: mediaType || 'image/jpeg', data: imageData } },
+              { inline_data: { mime_type: mime, data: imageData } },
               { text: prompt }
             ]
           }],
-          generationConfig: { temperature: 0.1 }
+          generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
         })
       }
     );
 
+    const geminiData = await geminiResp.json();
+
     if (!geminiResp.ok) {
-      const err = await geminiResp.text();
-      return res.status(500).json({ erro: 'Erro no Gemini: ' + err });
+      const detalhe = geminiData?.error?.message || JSON.stringify(geminiData);
+      return res.status(500).json({ erro: 'Gemini: ' + detalhe });
     }
 
-    const geminiData = await geminiResp.json();
     const texto = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // Parse do JSON retornado pela IA
+    if (!texto) {
+      return res.status(500).json({ erro: 'IA não retornou resposta. Tente com imagem PNG/JPG.' });
+    }
+
     let parsed;
     try {
       const clean = texto.replace(/```json|```/g, '').trim();
       parsed = JSON.parse(clean);
     } catch (e) {
       const match = texto.match(/\{[\s\S]*\}/);
-      if (match) parsed = JSON.parse(match[0]);
-      else return res.status(500).json({ erro: 'IA não retornou JSON válido' });
+      if (match) {
+        try { parsed = JSON.parse(match[0]); }
+        catch { return res.status(500).json({ erro: 'JSON inválido retornado pela IA' }); }
+      } else {
+        return res.status(500).json({ erro: 'IA não retornou JSON. Tente com imagem PNG/JPG.' });
+      }
     }
 
     return res.status(200).json(parsed);
 
   } catch (err) {
-    return res.status(500).json({ erro: err.message });
+    return res.status(500).json({ erro: 'Erro: ' + err.message });
   }
 }
