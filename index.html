@@ -2090,7 +2090,7 @@ async function processarComIA(){
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({imageData:base64,mediaType:importArquivo.type||"image/jpeg"})
     });
-    if(!resp.ok)throw new Error("Erro na API: "+resp.status);
+    if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.erro||"Erro na API: "+resp.status);}
     const data=await resp.json();
     if(data.erro)throw new Error(data.erro);
     importRascunhos=(data.lancamentos||[]).map((l,i)=>({...l,id:i,confirmado:false,pulado:false,conta:"",categoria:""}));
