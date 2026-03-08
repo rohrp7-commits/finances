@@ -2191,10 +2191,13 @@ async function detectarDatas(){
     document.getElementById("import-data-de").value=de;
     document.getElementById("import-data-ate").value=ate;
     const MA=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-    let resumo="Período identificado no extrato";
+    let resumo="Não foi possível detectar automaticamente — preencha as datas abaixo";
     if(de&&ate){
       const d1=new Date(de+"T00:00:00"),d2=new Date(ate+"T00:00:00");
-      resumo=`${d1.getDate()} ${MA[d1.getMonth()]} até ${d2.getDate()} ${MA[d2.getMonth()]} de ${d2.getFullYear()}`;
+      resumo=`Período identificado: ${d1.getDate()} ${MA[d1.getMonth()]} até ${d2.getDate()} ${MA[d2.getMonth()]} de ${d2.getFullYear()}`;
+    } else if(de){
+      const d1=new Date(de+"T00:00:00");
+      resumo=`Início identificado: ${d1.getDate()} ${MA[d1.getMonth()]} de ${d1.getFullYear()} — preencha a data final`;
     }
     document.getElementById("import-datas-resumo").textContent=resumo;
     importMostrarStep('15');
