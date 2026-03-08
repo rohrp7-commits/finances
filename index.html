@@ -369,42 +369,35 @@ select option{background:var(--bg3);}
 .saldo-real-val.pos{color:var(--green);}
 .saldo-real-val.neg{color:var(--red);}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
 <!-- TELA DE LOGIN -->
-<div id="login-screen" style="display:flex;position:fixed;inset:0;background:#080808;z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:0;">
-  <div style="width:100%;max-width:380px;padding:0 24px;">
-    <div style="text-align:center;margin-bottom:36px;">
-      <div style="font-size:28px;font-weight:900;color:#f5f5f5;letter-spacing:-.5px;font-family:'Plus Jakarta Sans',sans-serif;">Minhas Finanças</div>
-      <div style="font-size:13px;color:#666;margin-top:6px;font-family:'Plus Jakarta Sans',sans-serif;">Entre com sua conta para continuar</div>
+<div id="login-screen" style="display:flex;position:fixed;inset:0;background:#080808;z-index:999;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="width:100%;max-width:360px;padding:0 24px;text-align:center;">
+    <div style="font-size:30px;font-weight:900;color:#f5f5f5;letter-spacing:-.5px;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:8px;">Minhas Finanças</div>
+    <div style="font-size:13px;color:#555;margin-bottom:40px;font-family:'Plus Jakarta Sans',sans-serif;">Entre com sua conta Google para continuar</div>
+
+    <div id="login-erro" style="display:none;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);border-radius:12px;padding:12px 16px;font-size:12px;color:#ff5c5c;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;margin-bottom:16px;"></div>
+
+    <!-- Botão Google -->
+    <div id="g_id_onload"
+      data-client_id="707846544414-bi16tj9p10ljg2mp2e75o7cau89qrh8u.apps.googleusercontent.com"
+      data-callback="onGoogleLogin"
+      data-auto_prompt="false">
     </div>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div>
-        <label style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.8px;font-family:'Plus Jakarta Sans',sans-serif;display:block;margin-bottom:6px;">Email</label>
-        <input id="login-email" type="email" placeholder="seu@email.com" autocomplete="email"
-          style="width:100%;background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:14px 16px;color:#f5f5f5;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
-          onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.8px;font-family:'Plus Jakarta Sans',sans-serif;display:block;margin-bottom:6px;">Senha</label>
-        <div style="position:relative;">
-          <input id="login-senha" type="password" placeholder="••••••••" autocomplete="current-password"
-            style="width:100%;background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:14px 48px 14px 16px;color:#f5f5f5;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .2s;"
-            onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
-            onkeydown="if(event.key==='Enter')fazerLogin()">
-          <button onclick="toggleSenhaVis()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#666;padding:4px;" id="btn-olho">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-      </div>
-      <div id="login-erro" style="display:none;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);border-radius:10px;padding:10px 14px;font-size:12px;color:#ff5c5c;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:center;"></div>
-      <button onclick="fazerLogin()" id="login-btn"
-        style="width:100%;padding:15px;border-radius:99px;border:none;background:#2dd870;color:#080808;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px;transition:opacity .2s;letter-spacing:.3px;">
-        Entrar
-      </button>
+    <div class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="filled_black"
+      data-text="signin_with"
+      data-shape="pill"
+      data-logo_alignment="left"
+      data-width="300">
     </div>
+
+    <div style="margin-top:20px;font-size:11px;color:#444;font-family:'Plus Jakarta Sans',sans-serif;">Acesso restrito · apenas contas autorizadas</div>
   </div>
 </div>
 
@@ -830,6 +823,7 @@ select option{background:var(--bg3);}
   </div>
 </div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbybKSD7b2MFfMoZbM8jKhmBMNfe_yL8rNBYo-gkuxG4xkoXqIPQsAhHT1F4Df7lYuXcSw/exec";
 const CORES=["#c9a84c","#ef4444","#22c55e","#3b82f6","#a855f7","#f97316","#06b6d4","#ec4899"];
@@ -2080,40 +2074,33 @@ function iniciarApp(){
 
 <script>
 // ============================================================
-// LOGIN
 // ============================================================
-function toggleSenhaVis(){
-  const input=document.getElementById('login-senha');
-  input.type=input.type==='password'?'text':'password';
-}
-async function fazerLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const senha=document.getElementById('login-senha').value;
-  const btn=document.getElementById('login-btn');
-  const erro=document.getElementById('login-erro');
-  if(!email||!senha){mostrarErroLogin('Preencha email e senha.');return;}
-  btn.textContent='Entrando...';btn.style.opacity='.7';btn.disabled=true;
-  erro.style.display='none';
-  try{
-    const resp=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
-    const data=await resp.json();
-    if(data.ok){
-      sessionStorage.setItem('fin_auth',data.token);
+// LOGIN GOOGLE
+// ============================================================
+const EMAIL_AUTORIZADO = 'roh.rp7@gmail.com';
+
+function onGoogleLogin(response) {
+  try {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    const email = payload.email;
+    if (email === EMAIL_AUTORIZADO) {
+      sessionStorage.setItem('fin_auth', response.credential);
+      sessionStorage.setItem('fin_email', email);
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app-shell').style.display='';
       iniciarApp();
     } else {
-      mostrarErroLogin(data.erro||'Email ou senha incorretos.');
+      const el=document.getElementById('login-erro');
+      el.textContent='Acesso negado. Esta conta não tem permissão.';
+      el.style.display='block';
     }
-  }catch(e){
-    mostrarErroLogin('Erro de conexão. Tente novamente.');
+  } catch(e) {
+    const el=document.getElementById('login-erro');
+    el.textContent='Erro ao verificar conta Google.';
+    el.style.display='block';
   }
-  btn.textContent='Entrar';btn.style.opacity='1';btn.disabled=false;
 }
-function mostrarErroLogin(msg){
-  const el=document.getElementById('login-erro');
-  el.textContent=msg;el.style.display='block';
-}
+
 function verificarSessao(){
   const token=sessionStorage.getItem('fin_auth');
   if(token){
@@ -2123,6 +2110,7 @@ function verificarSessao(){
   }
 }
 window.addEventListener('DOMContentLoaded',verificarSessao);
+
 
 // ============================================================
 let importArquivo=null, importRascunhos=[];
