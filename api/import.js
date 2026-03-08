@@ -29,7 +29,7 @@ Regras: data YYYY-MM-DD, valor positivo, tipo "debito" ou "credito", ignore sald
       generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
     };
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     
     const resp = await fetch(url, {
       method: 'POST',
