@@ -422,9 +422,7 @@ select option{background:var(--bg3);}
     <button class="snav" onclick="desktopAba('metas',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Metas
     </button>
-    <button class="snav" onclick="desktopAba('categorias',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>Categorias
-    </button>
+
   </nav>
   <div class="sidebar-actions">
     <button class="sbtn sd" onclick="abrirModal('despesa')">
@@ -562,17 +560,7 @@ select option{background:var(--bg3);}
   </div>
 
   <!-- CATEGORIAS -->
-  <div id="desk-categorias" style="display:none;padding:28px;">
-    <div style="max-width:580px;">
-      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px">Categorias</div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:18px">Gerencie suas categorias e subcategorias</div>
-      <div class="nova-cat-row">
-        <input id="nova-cat-input" placeholder="Nome da nova categoria..." onkeydown="if(event.key==='Enter')salvarNovaCategoria('desk')">
-        <button onclick="salvarNovaCategoria('desk')">+ Categoria</button>
-      </div>
-      <div id="cats-lista-desk"></div>
-    </div>
-  </div>
+
 </main>
 </div>
 
@@ -946,16 +934,16 @@ function limparFiltros(){
 function desktopAba(aba,btn){
   document.querySelectorAll(".snav").forEach(b=>b.classList.remove("active"));
   if(btn)btn.classList.add("active");
-  ["inicio","relatorios","contas","metas","categorias"].forEach(a=>{
+  ["inicio","relatorios","contas","metas"].forEach(a=>{
     const el=document.getElementById("desk-"+a);if(el)el.style.display=a===aba?"block":"none";
   });
-  const titles={inicio:["Início","Visão geral das suas finanças"],relatorios:["Relatórios","Análise de gastos"],contas:["Contas","Saldos por banco"],metas:["Orçamentos","Limites de gasto por categoria"],categorias:["Categorias","Gerencie suas categorias"]};
+  const titles={inicio:["Início","Visão geral das suas finanças"],relatorios:["Relatórios","Análise de gastos"],contas:["Contas","Saldos por banco"],metas:["Orçamentos","Limites de gasto por categoria"]};
   document.getElementById("topbar-title").textContent=titles[aba][0];
   document.getElementById("topbar-sub").textContent=titles[aba][1];
   if(aba==="relatorios")renderRelDesk();
   if(aba==="contas")renderContasDesk();
   if(aba==="metas")renderMetasDesk();
-  if(aba==="categorias")renderCatsDesk();
+  
 }
 function mobileAba(aba,btn){
   document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));
@@ -972,7 +960,7 @@ function initLayout(){
   if(isMobile()){
     document.querySelector(".sidebar").style.display="none";
     document.querySelector(".topbar").style.display="none";
-    ["inicio","relatorios","contas","metas","categorias"].forEach(a=>{const el=document.getElementById("desk-"+a);if(el)el.style.display="none";});
+    ["inicio","relatorios","contas","metas"].forEach(a=>{const el=document.getElementById("desk-"+a);if(el)el.style.display="none";});
     document.querySelector(".main").style.marginLeft="0";
     document.querySelectorAll(".mobile-tab-content").forEach(el=>el.style.display="none");
     document.getElementById("mob-inicio").style.display="block";
