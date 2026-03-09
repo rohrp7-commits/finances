@@ -2022,36 +2022,8 @@ function iniciarApp(){
       </div>
       <button onclick="limparImportArquivo()" style="background:none;border:none;cursor:pointer;color:var(--text3);">✕</button>
     </div>
-    <button id="import-btn-processar" onclick="detectarDatas()" disabled style="width:100%;padding:16px;border-radius:99px;border:none;font-family:'Nunito',sans-serif;font-size:17.5px;font-weight:800;cursor:not-allowed;text-transform:uppercase;letter-spacing:.8px;background:var(--bg3);color:var(--text3);transition:all .2s;">
-      Analisar Extrato
-    </button>
-  </div>
-
-  <!-- STEP 1.5: Confirmar datas -->
-  <div id="import-step-15" style="display:none;flex:1;overflow-y:auto;padding:24px 16px;flex-direction:column;gap:16px;">
-    <div style="background:rgba(45,216,112,.06);border:1px solid rgba(45,216,112,.2);border-radius:16px;padding:16px 18px;">
-      <div style="font-size:17.5px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">✓ Extrato detectado</div>
-      <div style="font-size:16.5px;color:var(--text2)" id="import-datas-resumo">IA identificou o período do extrato</div>
-    </div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;">
-      <div style="font-size:16.5px;font-weight:700;color:var(--text);">Processar transações do período:</div>
-      <div style="display:flex;gap:10px;">
-        <div style="flex:1;">
-          <label style="font-size:17.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">De</label>
-          <input type="date" id="import-data-de" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:16.5px;font-weight:600;box-sizing:border-box;outline:none;">
-        </div>
-        <div style="flex:1;">
-          <label style="font-size:17.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Até</label>
-          <input type="date" id="import-data-ate" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:16.5px;font-weight:600;box-sizing:border-box;outline:none;">
-        </div>
-      </div>
-      <div style="font-size:16.5px;color:var(--text3);">💡 Ajuste o período para evitar lançamentos duplicados</div>
-    </div>
-    <button onclick="processarComIA()" style="width:100%;padding:16px;border-radius:99px;border:none;font-family:'Nunito',sans-serif;font-size:17.5px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.8px;background:var(--gold);color:#080808;">
+    <button id="import-btn-processar" onclick="processarComIA()" disabled style="width:100%;padding:16px;border-radius:99px;border:none;font-family:'Nunito',sans-serif;font-size:17.5px;font-weight:800;cursor:not-allowed;text-transform:uppercase;letter-spacing:.8px;background:var(--bg3);color:var(--text3);transition:all .2s;">
       Processar com IA
-    </button>
-    <button onclick="importMostrarStep(1)" style="width:100%;padding:12px;border-radius:99px;border:1px solid var(--border2);background:none;font-family:'Nunito',sans-serif;font-size:16.5px;font-weight:700;cursor:pointer;color:var(--text3);">
-      ← Voltar
     </button>
   </div>
 
@@ -2147,53 +2119,14 @@ function fecharImportIA(){
   document.body.style.overflow="";
 }
 function importMostrarStep(n){
-  [1,'15',2,3,4].forEach(i=>{
+  [1,2,3,4].forEach(i=>{
     const el=document.getElementById("import-step-"+i);
-    if(el)el.style.display=(i==n||i===n)?"flex":"none";
+    if(el)el.style.display=(i===n)?"flex":"none";
   });
-  const subs={1:"Suba o extrato do seu banco","15":"Confirme o período a processar",2:"Aguarde enquanto a IA analisa...",3:"Revise e confirme os lançamentos",4:"Importação concluída"};
+  const subs={1:"Suba o extrato do seu banco",2:"Aguarde enquanto a IA analisa...",3:"Revise e confirme os lançamentos",4:"Importação concluída"};
   document.getElementById("import-ia-sub").textContent=subs[n]||"";
 }
 
-async function detectarDatas(){
-  if(!importArquivo)return;
-  importMostrarStep(2);
-  document.getElementById("import-ia-status").textContent="Detectando período do extrato...";
-  try{
-    const base64=await new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=()=>res(r.result.split(",")[1]);
-      r.onerror=()=>rej(new Error("Erro ao ler arquivo"));
-      r.readAsDataURL(importArquivo);
-    });
-    window._importBase64=base64;
-    const resp=await fetch("/api/import",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({imageData:base64,mediaType:importArquivo.type||"image/jpeg",apenasDetectarDatas:true})
-    });
-    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.erro||"Erro "+resp.status);}
-    const data=await resp.json();
-    const de=data.dataInicio||"";
-    const ate=data.dataFim||"";
-    document.getElementById("import-data-de").value=de;
-    document.getElementById("import-data-ate").value=ate;
-    const MA=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-    let resumo="Não foi possível detectar automaticamente — preencha as datas abaixo";
-    if(de&&ate){
-      const d1=new Date(de+"T00:00:00"),d2=new Date(ate+"T00:00:00");
-      resumo=`Período identificado: ${d1.getDate()} ${MA[d1.getMonth()]} até ${d2.getDate()} ${MA[d2.getMonth()]} de ${d2.getFullYear()}`;
-    } else if(de){
-      const d1=new Date(de+"T00:00:00");
-      resumo=`Início identificado: ${d1.getDate()} ${MA[d1.getMonth()]} de ${d1.getFullYear()} — preencha a data final`;
-    }
-    document.getElementById("import-datas-resumo").textContent=resumo;
-    importMostrarStep('15');
-  }catch(err){
-    importMostrarStep(1);
-    showToast("Erro: "+err.message,true);
-  }
-}
 function importArquivoSelecionado(input){
   const file=input.files[0];if(!file)return;
   importArquivo=file;
@@ -2215,10 +2148,8 @@ function limparImportArquivo(){
 async function processarComIA(){
   if(!importArquivo)return;
   importMostrarStep(2);
-  const dataDe=document.getElementById("import-data-de")?.value||"";
-  const dataAte=document.getElementById("import-data-ate")?.value||"";
   try{
-    const base64=window._importBase64||await new Promise((res,rej)=>{
+    const base64=await new Promise((res,rej)=>{
       const r=new FileReader();
       r.onload=()=>res(r.result.split(",")[1]);
       r.onerror=()=>rej(new Error("Erro ao ler arquivo"));
@@ -2228,18 +2159,18 @@ async function processarComIA(){
     const resp=await fetch("/api/import",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({imageData:base64,mediaType:importArquivo.type||"image/jpeg",dataDe,dataAte})
+      body:JSON.stringify({imageData:base64,mediaType:importArquivo.type||"image/jpeg"})
     });
     if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.erro||"Erro na API: "+resp.status);}
     const data=await resp.json();
     if(data.erro)throw new Error(data.erro);
     importRascunhos=(data.lancamentos||[]).map((l,i)=>({...l,id:i,confirmado:false,pulado:false,conta:"",categoria:""}));
-    if(importRascunhos.length===0)throw new Error("Nenhum lançamento encontrado no período selecionado");
+    if(importRascunhos.length===0)throw new Error("Nenhum lançamento encontrado");
     renderRascunhos();
     importMostrarStep(3);
     document.getElementById("import-resumo-count").textContent=importRascunhos.length+" lançamento"+(importRascunhos.length>1?"s":"")+" encontrado"+(importRascunhos.length>1?"s":"");
   }catch(err){
-    importMostrarStep('15');
+    importMostrarStep(1);
     showToast("Erro: "+err.message,true);
   }
 }
