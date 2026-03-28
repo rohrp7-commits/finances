@@ -14,16 +14,13 @@ export default async function handler(req, res) {
   const mime = mediaType || 'application/pdf';
   const ano = new Date().getFullYear();
 
-  const prompt = `Você é um extrator de dados financeiros. Analise este extrato bancário.
-Retorne SOMENTE um JSON válido, sem texto antes ou depois, sem markdown, sem explicações:
-{"lancamentos":[{"data":"YYYY-MM-DD","descricao":"nome da transação","valor":0.00,"tipo":"debito"}]}
-Regras obrigatórias:
-- tipo: exatamente "debito" para saídas/gastos, exatamente "credito" para entradas/recebimentos
-- valor: número positivo sem símbolo de moeda
+  const prompt = `Analise este extrato bancário e extraia todas as transações.
+Retorne APENAS o JSON abaixo, sem nenhum texto adicional:
+{"lancamentos":[{"data":"YYYY-MM-DD","descricao":"nome","valor":0.00,"tipo":"debito"}]}
+- tipo: "debito" para saídas, "credito" para entradas
+- valor: número positivo
 - data: formato YYYY-MM-DD, ano padrão ${ano}
-- Ignore completamente: linhas de saldo anterior, saldo final, totais, cabeçalhos, rodapés, textos institucionais
-- Nunca duplique transações
-- Se não encontrar transações retorne: {"lancamentos":[]}`;
+- Ignore: saldos, totais, cabeçalhos`;
 
   try {
     const resp = await fetch(
@@ -36,52 +33,56 @@ Regras obrigatórias:
             { inline_data: { mime_type: mime, data: imageData } },
             { text: prompt }
           ]}],
-          generationConfig: {
-            temperature: 0,
-            maxOutputTokens: 8192,
-            responseMimeType: 'application/json'
-          }
+          generationConfig: { temperature: 0, maxOutputTokens: 8192 }
         })
       }
     );
 
     const data = await resp.json();
-    if (!resp.ok) return res.status(500).json({ erro: data?.error?.message || 'Erro no Gemini' });
 
-    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!texto) return res.status(500).json({ erro: 'IA não retornou resposta' });
-
-    // Tenta várias estratégias de parse
-    let parsed = null;
-
-    // 1. Parse direto
-    try { parsed = JSON.parse(texto.trim()); } catch {}
-
-    // 2. Remove markdown
-    if (!parsed) {
-      try { parsed = JSON.parse(texto.replace(/```json|```/g, '').trim()); } catch {}
+    if (!resp.ok) {
+      return res.status(500).json({ erro: data?.error?.message || 'Erro Gemini ' + resp.status });
     }
 
-    // 3. Extrai primeiro objeto JSON encontrado
+    // Verifica bloqueio de segurança
+    const candidate = data.candidates?.[0];
+    if (!candidate) {
+      const reason = data.promptFeedback?.blockReason || 'sem candidatos';
+      return res.status(500).json({ erro: 'IA bloqueou resposta: ' + reason });
+    }
+
+    const texto = candidate.content?.parts?.[0]?.text || '';
+    if (!texto) {
+      const finishReason = candidate.finishReason || 'desconhecido';
+      return res.status(500).json({ erro: 'IA não retornou texto. Motivo: ' + finishReason });
+    }
+
+    // Limpa o texto
+    const limpo = texto.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    // Tenta parse direto
+    let parsed = null;
+    try { parsed = JSON.parse(limpo); } catch {}
+
+    // Extrai JSON do meio do texto
     if (!parsed) {
-      const match = texto.match(/\{[\s\S]*\}/);
+      const match = limpo.match(/\{[\s\S]*"lancamentos"[\s\S]*\}/);
       if (match) try { parsed = JSON.parse(match[0]); } catch {}
     }
 
-    // 4. Extrai array diretamente
+    // Tenta pegar qualquer objeto JSON
     if (!parsed) {
-      const arrMatch = texto.match(/\[[\s\S]*\]/);
-      if (arrMatch) try { parsed = { lancamentos: JSON.parse(arrMatch[0]) }; } catch {}
+      const match = limpo.match(/\{[\s\S]*\}/);
+      if (match) try { parsed = JSON.parse(match[0]); } catch {}
     }
 
-    if (!parsed) {
-      return res.status(500).json({ erro: 'IA retornou formato inesperado. Tente novamente ou use uma imagem mais nítida.' });
+    if (!parsed || !Array.isArray(parsed.lancamentos)) {
+      // Retorna os primeiros 500 chars do texto para debug
+      return res.status(500).json({ 
+        erro: 'Formato inválido. Debug: ' + limpo.substring(0, 300)
+      });
     }
 
-    // Garante que lancamentos existe
-    if (!parsed.lancamentos) parsed = { lancamentos: [] };
-
-    // Limpa e valida cada lançamento
     parsed.lancamentos = parsed.lancamentos
       .filter(l => l && l.descricao && l.valor && l.data)
       .map(l => ({
@@ -93,7 +94,8 @@ Regras obrigatórias:
       .filter(l => l.valor > 0);
 
     return res.status(200).json(parsed);
+
   } catch (err) {
-    return res.status(500).json({ erro: 'Erro interno: ' + err.message });
+    return res.status(500).json({ erro: 'Erro: ' + err.message });
   }
 }
