@@ -344,11 +344,11 @@ select option{background:var(--bg3);}
 .add-inline{display:flex;gap:8px;padding:10px 14px;}
 .add-inline input{padding:8px 12px;font-size:17.5px;flex:1;border-radius:10px;}
 .add-inline button{padding:8px 14px;border-radius:10px;border:none;background:var(--gold);color:#09090f;font-weight:800;font-size:17.5px;cursor:pointer;white-space:nowrap;font-family:'Nunito',sans-serif;}
-.rateio-linha{display:grid;grid-template-columns:70px 1fr 28px;gap:6px;align-items:center;}
+.rateio-linha{display:grid;grid-template-columns:70px 1fr 1fr 28px;gap:6px;align-items:center;}
 .rateio-linha input{padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:600;width:100%;box-sizing:border-box;outline:none;}
 .rateio-linha select{padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13.5px;width:100%;box-sizing:border-box;outline:none;}
 .rateio-linha .rm-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,92,92,.12);color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
-.rateio-ia-linha{display:grid;grid-template-columns:1fr 80px;gap:6px;margin-top:6px;}
+.rateio-ia-linha{display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;margin-top:6px;}
 .rateio-ia-linha select{padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;width:100%;box-sizing:border-box;outline:none;}
 .rateio-ia-linha input{padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;width:100%;box-sizing:border-box;outline:none;}
 .nova-cat-row input{flex:1;padding:11px 14px;font-size:16.5px;border-radius:var(--radius2);}
@@ -1128,7 +1128,7 @@ function toggleRateio(){
 }
 
 function addRateioLinha(){
-  rateioLinhas.push({valor:"",categoria:""});
+  rateioLinhas.push({valor:"",conta:"",categoria:""});
   renderRateioLinhas();
 }
 
@@ -1141,11 +1141,15 @@ function removeRateioLinha(i){
 function renderRateioLinhas(){
   const container=document.getElementById("rateio-linhas");
   const total=parseFloat(document.getElementById("valor").value)||0;
+  const contasOpts=CONTAS_DEF.map(c=>`<option value="${c.nome}">${c.apelido||c.nome}</option>`).join("");
   container.innerHTML=rateioLinhas.map((l,i)=>`
     <div class="rateio-linha">
       <input type="number" placeholder="R$" step="0.01" min="0" value="${l.valor}"
         oninput="rateioLinhas[${i}].valor=this.value;verificarRateio()"
         style="text-align:center;">
+      <select onchange="rateioLinhas[${i}].conta=this.value">
+        <option value="">Conta...</option>${contasOpts.replace(`value="${l.conta}"`,`value="${l.conta}" selected`)}
+      </select>
       <select onchange="rateioLinhas[${i}].categoria=this.value">
         ${getCatsOptions(l.categoria)}
       </select>
@@ -1189,6 +1193,7 @@ function salvar(){
     const soma=rateioLinhas.reduce((s,l)=>s+(parseFloat(l.valor)||0),0);
     if(Math.abs(soma-val)>0.01){mostrarStatus("Valores do rateio devem somar R$ "+val.toFixed(2).replace(".",","),"erro");return;}
     if(rateioLinhas.some(l=>!l.categoria)){mostrarStatus("Selecione a categoria de cada linha do rateio.","erro");return;}
+    // conta por linha, ou cai na conta principal se não preenchida
     document.getElementById("btn-salvar").disabled=true;
     mostrarStatus("Salvando rateio...","sucesso");
     const salvarLinha=idx=>{
@@ -1199,7 +1204,8 @@ function salvar(){
         return;
       }
       const rl=rateioLinhas[idx];
-      fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(desc)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria)+"&conta="+encodeURIComponent(conta))
+      const contaLinha=rl.conta||conta;
+      fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(desc)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria)+"&conta="+encodeURIComponent(contaLinha))
       .then(r=>r.json()).then(()=>salvarLinha(idx+1))
       .catch(()=>{mostrarStatus("Erro ao salvar rateio.","erro");document.getElementById("btn-salvar").disabled=false;});
     };
@@ -2336,6 +2342,10 @@ function renderRascunhos(){
         :`<div id="rateio-ia-${i}" style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
           ${rateioLinhasIA.map((rl,ri)=>`
           <div class="rateio-ia-linha">
+            <select onchange="importSetRateioLinhaConta(${i},${ri},this.value)">
+              <option value="">Conta...</option>
+              ${CONTAS_DEF.map(c=>`<option value="${c.nome}"${rl.conta===c.nome?' selected':''}>${c.apelido||c.nome}</option>`).join('')}
+            </select>
             <select onchange="importSetRateioLinhaCat(${i},${ri},this.value)">${getCatsOptions(rl.categoria)}</select>
             <input type="number" placeholder="R$" step="0.01" value="${rl.valor}" oninput="importSetRateioLinhaVal(${i},${ri},this.value)">
           </div>`).join("")}
@@ -2374,6 +2384,7 @@ function importRemRateioLinha(i){
   if(rl&&rl.length>2)rl.pop();
   renderRascunhos();
 }
+function importSetRateioLinhaConta(i,ri,val){importRascunhos[i].rateioLinhas[ri].conta=val;}
 function importSetRateioLinhaCat(i,ri,val){importRascunhos[i].rateioLinhas[ri].categoria=val;}
 function importSetRateioLinhaVal(i,ri,val){importRascunhos[i].rateioLinhas[ri].valor=val;}
 async function importConfirmarUm(i){
@@ -2382,8 +2393,8 @@ async function importConfirmarUm(i){
     const soma=l.rateioLinhas.reduce((s,rl)=>s+(parseFloat(rl.valor)||0),0);
     if(Math.abs(soma-parseFloat(l.valor))>0.01){showToast("Valores do rateio devem somar R$ "+parseFloat(l.valor).toFixed(2).replace(".",","),true);return;}
     for(const rl of l.rateioLinhas){
-      const catFinal=rl.categoria||"";
-      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
+      const contaLinha=rl.conta||l.conta||"";
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(contaLinha));
     }
   } else {
     const catFinal=l.tipo==="credito"?(l.categoria||"receita"):l.categoria||"";
@@ -2402,7 +2413,7 @@ async function confirmarTodosImport(){
     try{
       if(l.rateioAtivo&&l.rateioLinhas&&l.rateioLinhas.length>0){
         for(const rl of l.rateioLinhas){
-          await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(l.conta||""));
+          await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(rl.conta||l.conta||""));
         }
       } else {
         const catFinal=l.tipo==="credito"&&!l.categoria.startsWith("receita")?"receita":l.categoria||"";
