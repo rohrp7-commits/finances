@@ -33,7 +33,7 @@ Retorne APENAS o JSON abaixo, sem nenhum texto adicional:
             { inline_data: { mime_type: mime, data: imageData } },
             { text: prompt }
           ]}],
-          generationConfig: { temperature: 0, maxOutputTokens: 8192 }
+          generationConfig: { temperature: 0, maxOutputTokens: 65536 }
         })
       }
     );
