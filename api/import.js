@@ -15,14 +15,15 @@ export default async function handler(req, res) {
   const ano = new Date().getFullYear();
 
   const prompt = `Você é um extrator de dados financeiros. Analise este extrato bancário.
-Retorne SOMENTE JSON sem markdown:
-{"lancamentos":[{"data":"YYYY-MM-DD","descricao":"nome","valor":0.00,"tipo":"debito"}]}
-Regras:
-- tipo: "debito" para saídas/gastos, "credito" para entradas/recebimentos
-- valor sempre positivo
-- Ignore: saldo anterior, saldo final, totais, cabeçalhos, rodapés
-- Não duplique transações
-- Ano padrão: ${ano}`;
+Retorne SOMENTE um JSON válido, sem texto antes ou depois, sem markdown, sem explicações:
+{"lancamentos":[{"data":"YYYY-MM-DD","descricao":"nome da transação","valor":0.00,"tipo":"debito"}]}
+Regras obrigatórias:
+- tipo: exatamente "debito" para saídas/gastos, exatamente "credito" para entradas/recebimentos
+- valor: número positivo sem símbolo de moeda
+- data: formato YYYY-MM-DD, ano padrão ${ano}
+- Ignore completamente: linhas de saldo anterior, saldo final, totais, cabeçalhos, rodapés, textos institucionais
+- Nunca duplique transações
+- Se não encontrar transações retorne: {"lancamentos":[]}`;
 
   try {
     const resp = await fetch(
@@ -35,7 +36,11 @@ Regras:
             { inline_data: { mime_type: mime, data: imageData } },
             { text: prompt }
           ]}],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
+          generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 8192,
+            responseMimeType: 'application/json'
+          }
         })
       }
     );
@@ -46,21 +51,49 @@ Regras:
     const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if (!texto) return res.status(500).json({ erro: 'IA não retornou resposta' });
 
-    let parsed;
-    try {
-      parsed = JSON.parse(texto.replace(/```json|```/g, '').trim());
-    } catch {
-      const match = texto.match(/\{[\s\S]*\}/);
-      if (match) {
-        try { parsed = JSON.parse(match[0]); }
-        catch { return res.status(500).json({ erro: 'JSON inválido da IA' }); }
-      } else {
-        return res.status(500).json({ erro: 'IA não retornou JSON válido' });
-      }
+    // Tenta várias estratégias de parse
+    let parsed = null;
+
+    // 1. Parse direto
+    try { parsed = JSON.parse(texto.trim()); } catch {}
+
+    // 2. Remove markdown
+    if (!parsed) {
+      try { parsed = JSON.parse(texto.replace(/```json|```/g, '').trim()); } catch {}
     }
+
+    // 3. Extrai primeiro objeto JSON encontrado
+    if (!parsed) {
+      const match = texto.match(/\{[\s\S]*\}/);
+      if (match) try { parsed = JSON.parse(match[0]); } catch {}
+    }
+
+    // 4. Extrai array diretamente
+    if (!parsed) {
+      const arrMatch = texto.match(/\[[\s\S]*\]/);
+      if (arrMatch) try { parsed = { lancamentos: JSON.parse(arrMatch[0]) }; } catch {}
+    }
+
+    if (!parsed) {
+      return res.status(500).json({ erro: 'IA retornou formato inesperado. Tente novamente ou use uma imagem mais nítida.' });
+    }
+
+    // Garante que lancamentos existe
+    if (!parsed.lancamentos) parsed = { lancamentos: [] };
+
+    // Limpa e valida cada lançamento
+    parsed.lancamentos = parsed.lancamentos
+      .filter(l => l && l.descricao && l.valor && l.data)
+      .map(l => ({
+        data: String(l.data).trim(),
+        descricao: String(l.descricao).trim(),
+        valor: Math.abs(parseFloat(l.valor) || 0),
+        tipo: l.tipo === 'credito' ? 'credito' : 'debito'
+      }))
+      .filter(l => l.valor > 0);
 
     return res.status(200).json(parsed);
   } catch (err) {
-    return res.status(500).json({ erro: err.message });
+    return res.status(500).json({ erro: 'Erro interno: ' + err.message });
   }
 }
