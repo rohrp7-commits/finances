@@ -344,7 +344,13 @@ select option{background:var(--bg3);}
 .add-inline{display:flex;gap:8px;padding:10px 14px;}
 .add-inline input{padding:8px 12px;font-size:17.5px;flex:1;border-radius:10px;}
 .add-inline button{padding:8px 14px;border-radius:10px;border:none;background:var(--gold);color:#09090f;font-weight:800;font-size:17.5px;cursor:pointer;white-space:nowrap;font-family:'Nunito',sans-serif;}
-.nova-cat-row{display:flex;gap:8px;margin-bottom:16px;}
+.rateio-linha{display:grid;grid-template-columns:70px 1fr 28px;gap:6px;align-items:center;}
+.rateio-linha input{padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:600;width:100%;box-sizing:border-box;outline:none;}
+.rateio-linha select{padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13.5px;width:100%;box-sizing:border-box;outline:none;}
+.rateio-linha .rm-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,92,92,.12);color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.rateio-ia-linha{display:grid;grid-template-columns:1fr 80px;gap:6px;margin-top:6px;}
+.rateio-ia-linha select{padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;width:100%;box-sizing:border-box;outline:none;}
+.rateio-ia-linha input{padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;width:100%;box-sizing:border-box;outline:none;}
 .nova-cat-row input{flex:1;padding:11px 14px;font-size:16.5px;border-radius:var(--radius2);}
 .nova-cat-row button{padding:11px 18px;border-radius:var(--radius2);border:none;background:var(--gold);color:#09090f;font-weight:800;font-size:16.5px;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;}
 
@@ -481,9 +487,9 @@ select option{background:var(--bg3);}
             <input class="filtro-input" id="filtro-busca" placeholder="Buscar..." oninput="aplicarFiltros()">
             <select class="filtro-select" id="filtro-conta" onchange="aplicarFiltros()">
               <option value="">Todas as contas</option>
-              <option value="Caixa Econômica">Caixa Econômica</option>
-              <option value="Santander">Santander</option>
-              <option value="Itaú">Itaú</option>
+              <option value="Caixa Econômica">Caixa - Mãe</option>
+              <option value="Santander">Santander - Rodrigo</option>
+              <option value="Itaú">Itaú - Pensão</option>
             </select>
             <select class="filtro-select" id="filtro-tipo" onchange="aplicarFiltros()">
               <option value="">Todos os tipos</option>
@@ -601,9 +607,9 @@ select option{background:var(--bg3);}
   <div style="padding:12px 14px 0;display:flex;gap:8px;flex-wrap:wrap;">
     <select class="filtro-select" id="mob-filtro-conta" style="flex:1;font-size:16.5px" onchange="aplicarFiltros()">
       <option value="">Todas as contas</option>
-      <option value="Caixa Econômica">Caixa</option>
-      <option value="Santander">Santander</option>
-      <option value="Itaú">Itaú</option>
+      <option value="Caixa Econômica">Caixa - Mãe</option>
+      <option value="Santander">Santander - Rodrigo</option>
+      <option value="Itaú">Itaú - Pensão</option>
     </select>
     <select class="filtro-select" id="mob-filtro-periodo" style="flex:1;font-size:16.5px" onchange="aplicarFiltros()">
       <option value="">Todo período</option>
@@ -700,9 +706,9 @@ select option{background:var(--bg3);}
         <label class="field-label">Conta</label>
         <select id="conta">
           <option value="" disabled selected>Selecione a conta</option>
-          <option value="Caixa Econômica">Caixa Econômica</option>
-          <option value="Santander">Santander</option>
-          <option value="Itaú">Itaú</option>
+          <option value="Caixa Econômica">Caixa - Mãe</option>
+          <option value="Santander">Santander - Rodrigo</option>
+          <option value="Itaú">Itaú - Pensão</option>
         </select>
       </div>
       <div id="campo-transferencia-contas" style="display:none">
@@ -711,9 +717,9 @@ select option{background:var(--bg3);}
             <label class="field-label" style="margin-top:0">De (origem)</label>
             <select id="conta-origem">
               <option value="" disabled selected>Conta origem</option>
-              <option value="Caixa Econômica">Caixa Econômica</option>
-              <option value="Santander">Santander</option>
-              <option value="Itaú">Itaú</option>
+              <option value="Caixa Econômica">Caixa - Mãe</option>
+              <option value="Santander">Santander - Rodrigo</option>
+              <option value="Itaú">Itaú - Pensão</option>
             </select>
           </div>
           <div style="padding-bottom:13px;color:var(--text3);">
@@ -723,16 +729,28 @@ select option{background:var(--bg3);}
             <label class="field-label" style="margin-top:0">Para (destino)</label>
             <select id="conta-destino">
               <option value="" disabled selected>Conta destino</option>
-              <option value="Caixa Econômica">Caixa Econômica</option>
-              <option value="Santander">Santander</option>
-              <option value="Itaú">Itaú</option>
+              <option value="Caixa Econômica">Caixa - Mãe</option>
+              <option value="Santander">Santander - Rodrigo</option>
+              <option value="Itaú">Itaú - Pensão</option>
             </select>
           </div>
         </div>
       </div>
       <div id="campo-cat">
-        <label class="field-label">Categoria</label>
-        <select id="categoria"><option value="" disabled selected>Selecione a categoria</option></select>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;margin-bottom:6px;">
+          <label class="field-label" style="margin:0">Categoria</label>
+          <button type="button" id="btn-rateio" onclick="toggleRateio()" style="background:rgba(212,168,75,.12);border:1px solid rgba(212,168,75,.3);border-radius:20px;padding:4px 12px;font-size:12.5px;font-weight:700;color:var(--gold);cursor:pointer;font-family:'Nunito',sans-serif;display:none;">✂️ Ratear</button>
+        </div>
+        <!-- Categoria simples -->
+        <div id="cat-simples">
+          <select id="categoria"><option value="" disabled selected>Selecione a categoria</option></select>
+        </div>
+        <!-- Rateio -->
+        <div id="cat-rateio" style="display:none;">
+          <div id="rateio-linhas" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button type="button" onclick="addRateioLinha()" style="margin-top:8px;width:100%;padding:9px;border-radius:10px;border:1px dashed rgba(212,168,75,.4);background:rgba(212,168,75,.05);color:var(--gold);font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;">+ Adicionar linha</button>
+          <div id="rateio-aviso" style="font-size:12.5px;color:var(--red);margin-top:6px;display:none;">Os valores devem somar R$ <span id="rateio-total-esperado"></span></div>
+        </div>
       </div>
       <div id="campo-receita" style="display:none">
         <label class="field-label">Tipo de receita</label>
@@ -818,9 +836,9 @@ const CORES=["#c9a84c","#ef4444","#22c55e","#3b82f6","#a855f7","#f97316","#06b6d
 const MESES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const DIAS=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 const CONTAS_DEF=[
-  {nome:"Caixa Econômica",sigla:"CEF",cls:"logo-caixa"},
-  {nome:"Santander",sigla:"SAN",cls:"logo-santander"},
-  {nome:"Itaú",sigla:"ITÁ",cls:"logo-itau"}
+  {nome:"Caixa Econômica",apelido:"Caixa - Mãe",sigla:"CEF",cls:"logo-caixa"},
+  {nome:"Santander",apelido:"Santander - Rodrigo",sigla:"SAN",cls:"logo-santander"},
+  {nome:"Itaú",apelido:"Itaú - Pensão",sigla:"ITÁ",cls:"logo-itau"}
 ];
 
 function getBankLogo(cls,size=22){
@@ -1031,7 +1049,9 @@ function trocarTipoVisual(tipo){
   document.getElementById("campo-parcela").style.display=tipo==="despesa"?"block":"none";
   document.getElementById("campo-conta-unica").style.display=tipo==="transferencia"?"none":"block";
   document.getElementById("campo-transferencia-contas").style.display=tipo==="transferencia"?"block":"none";
+  const btnR=document.getElementById("btn-rateio");if(btnR)btnR.style.display=tipo==="despesa"?"block":"none";
   if(tipo!=="despesa"){document.getElementById("toggle-parcela").checked=false;document.getElementById("parcela-fields").style.display="none";}
+  if(tipo!=="despesa"&&rateioAtivo)resetarRateio();
 }
 function toggleParcela(checked){document.getElementById("parcela-fields").style.display=checked?"block":"none";if(checked)atualizarVD(document.getElementById("valor").value);}
 function atualizarVD(v){
@@ -1041,6 +1061,15 @@ function atualizarVD(v){
   const elVP=document.getElementById("val-parcela");
   if(elVP&&n>1&&total>0)elVP.value=fmtVal(total/n);else if(elVP)elVP.value="";
 }
+function resetarRateio(){
+  rateioAtivo=false;rateioLinhas=[];
+  const cs=document.getElementById("cat-simples");const cr=document.getElementById("cat-rateio");
+  const br=document.getElementById("btn-rateio");
+  if(cs)cs.style.display="block";if(cr)cr.style.display="none";
+  if(br){br.style.background="rgba(212,168,75,.12)";br.textContent="✂️ Ratear";}
+  const rl=document.getElementById("rateio-linhas");if(rl)rl.innerHTML="";
+}
+
 function fecharModal(id){
   document.getElementById(id).classList.remove("open");
   if(id==="modal-lanc"){
@@ -1057,6 +1086,7 @@ function fecharModal(id){
     document.getElementById("edit-row-index").value="";
     document.getElementById("btn-salvar").className="btn-salvar btn-d";
     document.getElementById("btn-salvar").textContent="Registrar Gasto";
+    resetarRateio();
   }
 }
 function selecionarTipoReceita(btn){
@@ -1082,24 +1112,70 @@ function popularSelectCategorias(){
 }
 
 // SALVAR / EDITAR
+// RATEIO
+let rateioAtivo=false;
+let rateioLinhas=[];
+
+function toggleRateio(){
+  rateioAtivo=!rateioAtivo;
+  document.getElementById("cat-simples").style.display=rateioAtivo?"none":"block";
+  document.getElementById("cat-rateio").style.display=rateioAtivo?"block":"none";
+  document.getElementById("btn-rateio").style.background=rateioAtivo?"rgba(212,168,75,.3)":"rgba(212,168,75,.12)";
+  document.getElementById("btn-rateio").textContent=rateioAtivo?"✂️ Rateado":"✂️ Ratear";
+  if(rateioAtivo&&rateioLinhas.length===0){
+    addRateioLinha();addRateioLinha();
+  }
+}
+
+function addRateioLinha(){
+  rateioLinhas.push({valor:"",categoria:""});
+  renderRateioLinhas();
+}
+
+function removeRateioLinha(i){
+  if(rateioLinhas.length<=2)return;
+  rateioLinhas.splice(i,1);
+  renderRateioLinhas();
+}
+
+function renderRateioLinhas(){
+  const container=document.getElementById("rateio-linhas");
+  const total=parseFloat(document.getElementById("valor").value)||0;
+  container.innerHTML=rateioLinhas.map((l,i)=>`
+    <div class="rateio-linha">
+      <input type="number" placeholder="R$" step="0.01" min="0" value="${l.valor}"
+        oninput="rateioLinhas[${i}].valor=this.value;verificarRateio()"
+        style="text-align:center;">
+      <select onchange="rateioLinhas[${i}].categoria=this.value">
+        ${getCatsOptions(l.categoria)}
+      </select>
+      <button class="rm-btn" onclick="removeRateioLinha(${i})" type="button">✕</button>
+    </div>
+  `).join("");
+  verificarRateio();
+}
+
+function verificarRateio(){
+  const total=parseFloat(document.getElementById("valor").value)||0;
+  const soma=rateioLinhas.reduce((s,l)=>s+(parseFloat(l.valor)||0),0);
+  const aviso=document.getElementById("rateio-aviso");
+  document.getElementById("rateio-total-esperado").textContent=total.toFixed(2).replace(".",",");
+  const ok=Math.abs(soma-total)<0.01;
+  aviso.style.display=(total>0&&!ok)?"block":"none";
+}
+
 function salvar(){
   const desc=document.getElementById("descricao").value.trim();
   const val=parseFloat(document.getElementById("valor").value);
   const data=document.getElementById("data").value;
   const editRow=document.getElementById("edit-row-index").value;
 
-  // Conta: transferência usa origem, demais usa conta única
   const isTransf=tipoAtual==="transferencia";
   const conta=isTransf
     ?document.getElementById("conta-origem").value
     :document.getElementById("conta").value;
   const contaDestino=isTransf?document.getElementById("conta-destino").value:"";
 
-  const cat=tipoAtual==="despesa"
-    ?document.getElementById("categoria").value
-    :tipoAtual==="receita"
-      ?document.getElementById("tipo-receita").value
-      :tipoAtual;
   const parcelado=tipoAtual==="despesa"&&!editRow&&document.getElementById("toggle-parcela")?.checked;
   const numParcelas=parcelado?parseInt(document.getElementById("num-parcelas").value)||1:1;
 
@@ -1107,12 +1183,41 @@ function salvar(){
   if(!isTransf&&!conta){mostrarStatus("Selecione a conta.","erro");return;}
   if(isTransf&&(!conta||!contaDestino)){mostrarStatus("Selecione origem e destino.","erro");return;}
   if(isTransf&&conta===contaDestino){mostrarStatus("Origem e destino não podem ser iguais.","erro");return;}
-  if(tipoAtual==="despesa"&&!document.getElementById("categoria").value){mostrarStatus("Selecione uma categoria.","erro");return;}
+
+  // RATEIO
+  if(tipoAtual==="despesa"&&rateioAtivo){
+    const soma=rateioLinhas.reduce((s,l)=>s+(parseFloat(l.valor)||0),0);
+    if(Math.abs(soma-val)>0.01){mostrarStatus("Valores do rateio devem somar R$ "+val.toFixed(2).replace(".",","),"erro");return;}
+    if(rateioLinhas.some(l=>!l.categoria)){mostrarStatus("Selecione a categoria de cada linha do rateio.","erro");return;}
+    document.getElementById("btn-salvar").disabled=true;
+    mostrarStatus("Salvando rateio...","sucesso");
+    const salvarLinha=idx=>{
+      if(idx>=rateioLinhas.length){
+        mostrarStatus("✓ Rateio salvo!","sucesso");
+        setTimeout(()=>{fecharModal("modal-lanc");carregarDados();},700);
+        document.getElementById("btn-salvar").disabled=false;
+        return;
+      }
+      const rl=rateioLinhas[idx];
+      fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(desc)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria)+"&conta="+encodeURIComponent(conta))
+      .then(r=>r.json()).then(()=>salvarLinha(idx+1))
+      .catch(()=>{mostrarStatus("Erro ao salvar rateio.","erro");document.getElementById("btn-salvar").disabled=false;});
+    };
+    salvarLinha(0);
+    return;
+  }
+
+  const cat=tipoAtual==="despesa"
+    ?document.getElementById("categoria").value
+    :tipoAtual==="receita"
+      ?document.getElementById("tipo-receita").value
+      :tipoAtual;
+
+  if(tipoAtual==="despesa"&&!rateioAtivo&&!document.getElementById("categoria").value){mostrarStatus("Selecione uma categoria.","erro");return;}
   if(tipoAtual==="receita"&&!document.getElementById("tipo-receita").value){mostrarStatus("Selecione o tipo de receita.","erro");return;}
   if(parcelado&&numParcelas<2){mostrarStatus("Informe o número de parcelas (mínimo 2).","erro");return;}
   document.getElementById("btn-salvar").disabled=true;
 
-  // Descrição automática para transferência se vazia
   const descFinal=desc||(isTransf?conta+" → "+contaDestino:desc);
 
   if(editRow){
@@ -1137,7 +1242,6 @@ function salvar(){
     };
     salvarUma(0);
   } else {
-    // Para transferência: salva descrição como "origem → destino"
     const descSalva=isTransf?(desc||conta+" → "+contaDestino):descFinal;
     fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(descSalva)+"&valor="+encodeURIComponent(val)+"&categoria="+encodeURIComponent(cat)+"&conta="+encodeURIComponent(conta)+(isTransf?"&contaDestino="+encodeURIComponent(contaDestino):""))
     .then(r=>r.json()).then(()=>{mostrarStatus("Registrado!","sucesso");setTimeout(()=>{fecharModal("modal-lanc");carregarDados();},700);document.getElementById("btn-salvar").disabled=false;})
@@ -1645,7 +1749,7 @@ function renderContasSidebar(){
     const sReal=saldosIniciais[c.nome]!=null?saldosIniciais[c.nome]+s:null;
     return`<div class="conta-item" onclick="abrirDetalheConta('${c.nome}')">
       <div class="clogo ${c.cls}">${getBankLogo(c.cls,20)}</div>
-      <div class="conta-info"><div class="conta-nome">${c.nome}</div>
+      <div class="conta-info"><div class="conta-nome">${c.apelido||c.nome}</div>
         <div class="conta-sub2">${q} transações${sReal!=null?" · Real: "+fmtVal(sReal):""}</div>
       </div>
       <div class="conta-saldo ${pos?"pos":"neg"}">${fmtVal(Math.abs(s))}</div>
@@ -1662,7 +1766,7 @@ function renderContasDesk(){
     return`<div class="card" style="padding:22px;cursor:pointer;transition:border-color .2s" onclick="abrirDetalheConta('${c.nome}')" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
         <div class="clogo ${c.cls}" style="width:48px;height:48px;border-radius:12px;">${getBankLogo(c.cls,26)}</div>
-        <div><div style="font-size:16.5px;font-weight:700;color:var(--text)">${c.nome}</div><div style="font-size:16.5px;color:var(--text3);margin-top:2px">Conta Corrente · ${q} transações</div></div>
+        <div><div style="font-size:16.5px;font-weight:700;color:var(--text)">${c.apelido||c.nome}</div><div style="font-size:16.5px;color:var(--text3);margin-top:2px">Conta Corrente · ${q} transações</div></div>
       </div>
       <div style="margin-bottom:${sReal!=null?'10px':'0'}">
         <div style="font-size:17.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">${pos?"Saldo movimentações":"Gasto total"}</div>
@@ -1681,7 +1785,7 @@ function renderContasMob(){
     const sReal=saldosIniciais[c.nome]!=null?saldosIniciais[c.nome]+s:null;
     return`<div class="mob-conta-card" onclick="abrirDetalheConta('${c.nome}')">
       <div class="clogo ${c.cls}" style="width:44px;height:44px;border-radius:11px;">${getBankLogo(c.cls,24)}</div>
-      <div class="mob-conta-info"><div class="mob-conta-nome">${c.nome}</div>
+      <div class="mob-conta-info"><div class="mob-conta-nome">${c.apelido||c.nome}</div>
         <div class="mob-conta-sub">${q} transações${sReal!=null?" · Real: "+fmtVal(sReal):""}</div>
       </div>
       <div style="text-align:right">
@@ -1972,9 +2076,9 @@ function iniciarApp(){
   <div style="padding:10px 14px 0;display:flex;gap:8px;flex-shrink:0;" id="extrato-full-filtros">
     <select class="filtro-select" id="full-filtro-conta" style="flex:1;font-size:16.5px" onchange="renderExtratoFull()">
       <option value="">Todas as contas</option>
-      <option value="Caixa Econômica">Caixa</option>
-      <option value="Santander">Santander</option>
-      <option value="Itaú">Itaú</option>
+      <option value="Caixa Econômica">Caixa - Mãe</option>
+      <option value="Santander">Santander - Rodrigo</option>
+      <option value="Itaú">Itaú - Pensão</option>
     </select>
     <select class="filtro-select" id="full-filtro-tipo" style="flex:1;font-size:16.5px" onchange="renderExtratoFull()">
       <option value="">Todos os tipos</option>
@@ -2199,6 +2303,8 @@ function renderRascunhos(){
     const dataFmt=`${d.getDate()} ${MA[d.getMonth()]}`;
     const isRec=l.tipo==="credito";
     const cor=isRec?"var(--green)":"var(--red)";
+    const rateioLinhasIA=l.rateioLinhas||[];
+    const rateioAtivoIA=l.rateioAtivo||false;
     return`<div class="rascunho-card${l.confirmado?" confirmado":""}" id="rascunho-${i}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
         <div style="flex:1;min-width:0;">
@@ -2218,9 +2324,28 @@ function renderRascunhos(){
       <input type="text" class="rascunho-select" value="${l.descricao}" oninput="importSetDesc(${i},this.value)" placeholder="Descrição" style="outline:none;">
       <select class="rascunho-select" onchange="importSetConta(${i},this.value)">
         <option value="">Selecionar conta...</option>
-        ${CONTAS_DEF.map(c=>`<option value="${c.nome}"${l.conta===c.nome?" selected":""}>${c.nome}</option>`).join("")}
+        ${CONTAS_DEF.map(c=>`<option value="${c.nome}"${l.conta===c.nome?" selected":""}>${c.apelido||c.nome}</option>`).join("")}
       </select>
-      <select class="rascunho-select" onchange="importSetCat(${i},this.value)">${getCatsOptions(l.categoria)}</select>
+      ${!isRec?`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+        <span style="font-size:12.5px;color:var(--text3);font-weight:600">Categoria</span>
+        <button onclick="toggleRateioIA(${i})" style="background:${rateioAtivoIA?"rgba(212,168,75,.3)":"rgba(212,168,75,.12)"};border:1px solid rgba(212,168,75,.3);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;font-family:'Nunito',sans-serif;">${rateioAtivoIA?"✂️ Rateado":"✂️ Ratear"}</button>
+      </div>
+      ${!rateioAtivoIA
+        ?`<select class="rascunho-select" style="margin-top:4px" onchange="importSetCat(${i},this.value)">${getCatsOptions(l.categoria)}</select>`
+        :`<div id="rateio-ia-${i}" style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
+          ${rateioLinhasIA.map((rl,ri)=>`
+          <div class="rateio-ia-linha">
+            <select onchange="importSetRateioLinhaCat(${i},${ri},this.value)">${getCatsOptions(rl.categoria)}</select>
+            <input type="number" placeholder="R$" step="0.01" value="${rl.valor}" oninput="importSetRateioLinhaVal(${i},${ri},this.value)">
+          </div>`).join("")}
+          <div style="display:flex;gap:8px;margin-top:2px;">
+            <button onclick="importAddRateioLinha(${i})" style="flex:1;padding:7px;border-radius:10px;border:1px dashed rgba(212,168,75,.4);background:rgba(212,168,75,.05);color:var(--gold);font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;">+ Linha</button>
+            ${rateioLinhasIA.length>2?`<button onclick="importRemRateioLinha(${i})" style="padding:7px 12px;border-radius:10px;border:1px solid rgba(255,92,92,.3);background:rgba(255,92,92,.05);color:var(--red);font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;">- Remover</button>`:""}
+          </div>
+          <div style="font-size:12px;color:var(--text3);text-align:right;">Total: R$ ${rateioLinhasIA.reduce((s,rl)=>s+(parseFloat(rl.valor)||0),0).toFixed(2).replace(".",",")} / R$ ${parseFloat(l.valor).toFixed(2).replace(".",",")}</div>
+        </div>`
+      }`:""}
       <button onclick="importConfirmarUm(${i})" style="width:100%;margin-top:10px;padding:11px;border-radius:99px;border:none;background:var(--gold);color:#080808;font-family:'Nunito',sans-serif;font-size:17.5px;font-weight:800;cursor:pointer;">✓ Confirmar este</button>`
       :`<div style="margin-top:8px;font-size:16.5px;color:var(--green);font-weight:600;">✓ Confirmado · ${l.conta||"sem conta"}</div>`}
     </div>`;
@@ -2231,13 +2356,42 @@ function importSetConta(i,val){importRascunhos[i].conta=val;}
 function importSetCat(i,val){importRascunhos[i].categoria=val;}
 function importIgnorar(i){importRascunhos[i].pulado=true;renderRascunhos();}
 function importDesIgnorar(i){importRascunhos[i].pulado=false;renderRascunhos();}
+function toggleRateioIA(i){
+  const l=importRascunhos[i];
+  l.rateioAtivo=!l.rateioAtivo;
+  if(l.rateioAtivo&&(!l.rateioLinhas||l.rateioLinhas.length===0)){
+    l.rateioLinhas=[{categoria:"",valor:""},{categoria:"",valor:""}];
+  }
+  renderRascunhos();
+}
+function importAddRateioLinha(i){
+  if(!importRascunhos[i].rateioLinhas)importRascunhos[i].rateioLinhas=[];
+  importRascunhos[i].rateioLinhas.push({categoria:"",valor:""});
+  renderRascunhos();
+}
+function importRemRateioLinha(i){
+  const rl=importRascunhos[i].rateioLinhas;
+  if(rl&&rl.length>2)rl.pop();
+  renderRascunhos();
+}
+function importSetRateioLinhaCat(i,ri,val){importRascunhos[i].rateioLinhas[ri].categoria=val;}
+function importSetRateioLinhaVal(i,ri,val){importRascunhos[i].rateioLinhas[ri].valor=val;}
 async function importConfirmarUm(i){
   const l=importRascunhos[i];if(!l||l.pulado)return;
-  const catFinal=l.tipo==="credito"?(l.categoria||"receita"):l.categoria||"";
-  try{
-    await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(l.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
-    importRascunhos[i].confirmado=true;renderRascunhos();
-  }catch(e){showToast("Erro ao salvar.",true);}
+  if(l.rateioAtivo&&l.rateioLinhas&&l.rateioLinhas.length>0){
+    const soma=l.rateioLinhas.reduce((s,rl)=>s+(parseFloat(rl.valor)||0),0);
+    if(Math.abs(soma-parseFloat(l.valor))>0.01){showToast("Valores do rateio devem somar R$ "+parseFloat(l.valor).toFixed(2).replace(".",","),true);return;}
+    for(const rl of l.rateioLinhas){
+      const catFinal=rl.categoria||"";
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
+    }
+  } else {
+    const catFinal=l.tipo==="credito"?(l.categoria||"receita"):l.categoria||"";
+    try{
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(l.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
+    }catch(e){showToast("Erro ao salvar.",true);return;}
+  }
+  importRascunhos[i].confirmado=true;renderRascunhos();
 }
 async function confirmarTodosImport(){
   const btn=document.getElementById("btn-confirmar-todos");
@@ -2245,9 +2399,15 @@ async function confirmarTodosImport(){
   const pendentes=importRascunhos.filter(l=>!l.confirmado&&!l.pulado);
   let salvos=0;
   for(const l of pendentes){
-    const catFinal=l.tipo==="credito"&&!l.categoria.startsWith("receita")?"receita":l.categoria||"";
     try{
-      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(l.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
+      if(l.rateioAtivo&&l.rateioLinhas&&l.rateioLinhas.length>0){
+        for(const rl of l.rateioLinhas){
+          await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(l.conta||""));
+        }
+      } else {
+        const catFinal=l.tipo==="credito"&&!l.categoria.startsWith("receita")?"receita":l.categoria||"";
+        await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(l.valor).toFixed(2))+"&categoria="+encodeURIComponent(catFinal)+"&conta="+encodeURIComponent(l.conta||""));
+      }
       l.confirmado=true;salvos++;
       const prog=document.getElementById("import-ia-progresso");
       prog.style.display="block";prog.textContent=salvos+"/"+pendentes.length;
