@@ -1128,7 +1128,7 @@ function toggleRateio(){
 }
 
 function addRateioLinha(){
-  rateioLinhas.push({valor:"",conta:"",categoria:""});
+  rateioLinhas.push({descricao:"",valor:"",conta:"",categoria:""});
   renderRateioLinhas();
 }
 
@@ -1143,17 +1143,24 @@ function renderRateioLinhas(){
   const total=parseFloat(document.getElementById("valor").value)||0;
   const contasOpts=CONTAS_DEF.map(c=>`<option value="${c.nome}">${c.apelido||c.nome}</option>`).join("");
   container.innerHTML=rateioLinhas.map((l,i)=>`
-    <div class="rateio-linha">
-      <input type="number" placeholder="R$" step="0.01" min="0" value="${l.valor}"
-        oninput="rateioLinhas[${i}].valor=this.value;verificarRateio()"
-        style="text-align:center;">
-      <select onchange="rateioLinhas[${i}].conta=this.value">
-        <option value="">Conta...</option>${contasOpts.replace(`value="${l.conta}"`,`value="${l.conta}" selected`)}
-      </select>
-      <select onchange="rateioLinhas[${i}].categoria=this.value">
-        ${getCatsOptions(l.categoria)}
-      </select>
-      <button class="rm-btn" onclick="removeRateioLinha(${i})" type="button">✕</button>
+    <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;position:relative;">
+      <button class="rm-btn" onclick="removeRateioLinha(${i})" type="button" style="position:absolute;top:10px;right:10px;">✕</button>
+      <input type="text" placeholder="Descrição desta parte..." value="${l.descricao||''}"
+        oninput="rateioLinhas[${i}].descricao=this.value"
+        style="padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:600;width:100%;box-sizing:border-box;outline:none;padding-right:40px;">
+      <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;">
+        <input type="number" placeholder="R$" step="0.01" min="0" value="${l.valor}"
+          oninput="rateioLinhas[${i}].valor=this.value;verificarRateio()"
+          style="padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:700;text-align:center;width:100%;box-sizing:border-box;outline:none;">
+        <select onchange="rateioLinhas[${i}].conta=this.value"
+          style="padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;width:100%;box-sizing:border-box;outline:none;">
+          <option value="">Conta...</option>${contasOpts.replace(`value="${l.conta}"`,`value="${l.conta}" selected`)}
+        </select>
+        <select onchange="rateioLinhas[${i}].categoria=this.value"
+          style="padding:9px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;width:100%;box-sizing:border-box;outline:none;">
+          ${getCatsOptions(l.categoria)}
+        </select>
+      </div>
     </div>
   `).join("");
   verificarRateio();
@@ -1205,7 +1212,8 @@ function salvar(){
       }
       const rl=rateioLinhas[idx];
       const contaLinha=rl.conta||conta;
-      fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(desc)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria)+"&conta="+encodeURIComponent(contaLinha))
+      const descLinha=rl.descricao||desc;
+      fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(descLinha)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria)+"&conta="+encodeURIComponent(contaLinha))
       .then(r=>r.json()).then(()=>salvarLinha(idx+1))
       .catch(()=>{mostrarStatus("Erro ao salvar rateio.","erro");document.getElementById("btn-salvar").disabled=false;});
     };
@@ -2341,13 +2349,18 @@ function renderRascunhos(){
         ?`<select class="rascunho-select" style="margin-top:4px" onchange="importSetCat(${i},this.value)">${getCatsOptions(l.categoria)}</select>`
         :`<div id="rateio-ia-${i}" style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
           ${rateioLinhasIA.map((rl,ri)=>`
-          <div class="rateio-ia-linha">
-            <select onchange="importSetRateioLinhaConta(${i},${ri},this.value)">
-              <option value="">Conta...</option>
-              ${CONTAS_DEF.map(c=>`<option value="${c.nome}"${rl.conta===c.nome?' selected':''}>${c.apelido||c.nome}</option>`).join('')}
-            </select>
-            <select onchange="importSetRateioLinhaCat(${i},${ri},this.value)">${getCatsOptions(rl.categoria)}</select>
-            <input type="number" placeholder="R$" step="0.01" value="${rl.valor}" oninput="importSetRateioLinhaVal(${i},${ri},this.value)">
+          <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;">
+            <input type="text" placeholder="Descrição desta parte..." value="${rl.descricao||''}"
+              oninput="importRascunhos[${i}].rateioLinhas[${ri}].descricao=this.value"
+              style="padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;width:100%;box-sizing:border-box;outline:none;">
+            <div class="rateio-ia-linha">
+              <select onchange="importSetRateioLinhaConta(${i},${ri},this.value)">
+                <option value="">Conta...</option>
+                ${CONTAS_DEF.map(c=>`<option value="${c.nome}"${rl.conta===c.nome?' selected':''}>${c.apelido||c.nome}</option>`).join('')}
+              </select>
+              <select onchange="importSetRateioLinhaCat(${i},${ri},this.value)">${getCatsOptions(rl.categoria)}</select>
+              <input type="number" placeholder="R$" step="0.01" value="${rl.valor}" oninput="importSetRateioLinhaVal(${i},${ri},this.value)">
+            </div>
           </div>`).join("")}
           <div style="display:flex;gap:8px;margin-top:2px;">
             <button onclick="importAddRateioLinha(${i})" style="flex:1;padding:7px;border-radius:10px;border:1px dashed rgba(212,168,75,.4);background:rgba(212,168,75,.05);color:var(--gold);font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;">+ Linha</button>
@@ -2394,7 +2407,8 @@ async function importConfirmarUm(i){
     if(Math.abs(soma-parseFloat(l.valor))>0.01){showToast("Valores do rateio devem somar R$ "+parseFloat(l.valor).toFixed(2).replace(".",","),true);return;}
     for(const rl of l.rateioLinhas){
       const contaLinha=rl.conta||l.conta||"";
-      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(contaLinha));
+      const descLinha=rl.descricao||l.descricao;
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(descLinha)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(contaLinha));
     }
   } else {
     const catFinal=l.tipo==="credito"?(l.categoria||"receita"):l.categoria||"";
@@ -2413,7 +2427,7 @@ async function confirmarTodosImport(){
     try{
       if(l.rateioAtivo&&l.rateioLinhas&&l.rateioLinhas.length>0){
         for(const rl of l.rateioLinhas){
-          await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(rl.conta||l.conta||""));
+          await fetch(SCRIPT_URL+"?data="+encodeURIComponent(l.data)+"&descricao="+encodeURIComponent(rl.descricao||l.descricao)+"&valor="+encodeURIComponent(parseFloat(rl.valor).toFixed(2))+"&categoria="+encodeURIComponent(rl.categoria||"")+"&conta="+encodeURIComponent(rl.conta||l.conta||""));
         }
       } else {
         const catFinal=l.tipo==="credito"&&!l.categoria.startsWith("receita")?"receita":l.categoria||"";
