@@ -1749,7 +1749,7 @@ function renderGraficoCat(cid,lid,dados,bcid){
             <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Início
           </button>
           <span class="cat-bc-sep">›</span>
-          <button class="cat-bc-btn" onclick="drillState['${cid+'_sub}']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;font-family:'Nunito',sans-serif;">${catAtual}</button>
+          <button class="cat-bc-btn" onclick="drillState['${cid}_sub']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;font-family:'Nunito',sans-serif;">${catAtual}</button>
           <span class="cat-bc-sep">›</span>
           <span class="cat-bc-cur">${subAtual}</span>
         </div>`;
@@ -1776,7 +1776,7 @@ function renderGraficoCat(cid,lid,dados,bcid){
       const chevron=(temSubCat||clicavelNivel2)?`<svg class="cat-drill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`:"";
       let onclick="";
       if(temSubCat) onclick=`onclick="drillState['${cid}']='${l.replace(/'/g,"\\'")}';drillState['${cid}_sub']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid||""}')"`;
-      else if(clicavelNivel2) onclick=`onclick="drillState['${cid+'_sub}']='${l.replace(/'/g,"\\'")}';renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid||""}')"`;
+      else if(clicavelNivel2) onclick=`onclick="drillState['${cid}_sub']='${l.replace(/'/g,"\\'")}';renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid||""}')"`;
       return`<div class="cat-item ${clicavel}" ${onclick}>
         <div class="cat-dot" style="background:${CORES[i%CORES.length]}"></div>
         <span class="cat-nome">${l}</span>
