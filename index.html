@@ -1683,19 +1683,32 @@ function renderGraficoCat(cid,lid,dados,bcid){
     }
   });
 
-  let labels,values,temSub;
-  if(catAtual&&porSubCategoria[catAtual]){
-    // Drilldown: mostra subcategorias da categoria clicada
+  let labels,values,temSub,nivel;
+  const subAtual=drillState[cid+'_sub']||null;
+
+  if(catAtual&&subAtual){
+    // Nível 3: lançamentos da subcategoria
+    const catCompleta=catAtual+" - "+subAtual;
+    const lancs=dados.filter(l=>!isRecHelper(l)&&l.categoria===catCompleta);
+    // Agrupa por descrição
+    const porDesc={};
+    lancs.forEach(l=>{const d=l.descricao||"Sem descrição";porDesc[d]=(porDesc[d]||0)+(parseFloat(l.valor)||0);});
+    labels=Object.keys(porDesc).sort((a,b)=>porDesc[b]-porDesc[a]);
+    values=labels.map(k=>porDesc[k]);
+    total=values.reduce((a,b)=>a+b,0);
+    temSub=false;nivel=3;
+  } else if(catAtual&&porSubCategoria[catAtual]){
+    // Nível 2: subcategorias
     const subs=porSubCategoria[catAtual];
     labels=Object.keys(subs).sort((a,b)=>subs[b]-subs[a]);
     values=labels.map(k=>subs[k]);
     total=values.reduce((a,b)=>a+b,0);
-    temSub=false;
+    temSub=true;nivel=2;
   } else {
-    // Visão geral: mostra categorias principais
+    // Nível 1: categorias principais
     labels=Object.keys(porCatPrincipal).sort((a,b)=>porCatPrincipal[b]-porCatPrincipal[a]);
     values=labels.map(k=>porCatPrincipal[k]);
-    temSub=true;
+    temSub=true;nivel=1;
   }
 
   if(graficos[cid])graficos[cid].destroy();
@@ -1711,25 +1724,38 @@ function renderGraficoCat(cid,lid,dados,bcid){
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>" "+fmtVal(ctx.raw)}}},
       cutout:"70%",
       onClick:(evt,els)=>{
-        if(!temSub||!els.length)return;
-        const cat=labels[els[0].index];
-        if(porSubCategoria[cat]&&Object.keys(porSubCategoria[cat]).length>0){
-          drillState[cid]=cat;
+        if(!els.length)return;
+        const lbl=labels[els[0].index];
+        if(nivel===1&&porSubCategoria[lbl]&&Object.keys(porSubCategoria[lbl]).length>0){
+          drillState[cid]=lbl;
+          drillState[cid+'_sub']=null;
+          renderGraficoCat(cid,lid,dados,bcid);
+        } else if(nivel===2){
+          drillState[cid+'_sub']=lbl;
           renderGraficoCat(cid,lid,dados,bcid);
         }
       }
     }
   });
-  // Cursor pointer no canvas quando tem drilldown
-  canvas.style.cursor=temSub?"pointer":"default";
+  canvas.style.cursor=(nivel<3)?"pointer":"default";
 
   // Breadcrumb
   if(bcid){
     const el=document.getElementById(bcid);
     if(el){
-      if(catAtual){
+      if(nivel===3){
         el.innerHTML=`<div class="cat-breadcrumb">
-          <button class="cat-bc-btn" onclick="drillState['${cid}']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid}')">
+          <button class="cat-bc-btn" onclick="drillState['${cid}']=null;drillState['${cid}_sub']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Início
+          </button>
+          <span class="cat-bc-sep">›</span>
+          <button class="cat-bc-btn" onclick="drillState['${cid+'_sub}']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;font-family:'Nunito',sans-serif;">${catAtual}</button>
+          <span class="cat-bc-sep">›</span>
+          <span class="cat-bc-cur">${subAtual}</span>
+        </div>`;
+      } else if(nivel===2){
+        el.innerHTML=`<div class="cat-breadcrumb">
+          <button class="cat-bc-btn" onclick="drillState['${cid}']=null;drillState['${cid}_sub']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid}')">
             <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Voltar
           </button>
           <span class="cat-bc-sep">›</span>
@@ -1744,10 +1770,13 @@ function renderGraficoCat(cid,lid,dados,bcid){
   if(lid){
     document.getElementById(lid).innerHTML=labels.map((l,i)=>{
       const pct=total>0?((values[i]/total)*100).toFixed(0):0;
-      const temSubCat=temSub&&porSubCategoria[l]&&Object.keys(porSubCategoria[l]).length>0;
-      const clicavel=temSubCat?"":"no-drill";
-      const chevron=temSubCat?`<svg class="cat-drill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`:"";
-      const onclick=temSubCat?`onclick="drillState['${cid}']='${l.replace(/'/g,"\\'")}';renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid||""}')"` :"";
+      const temSubCat=nivel===1&&porSubCategoria[l]&&Object.keys(porSubCategoria[l]).length>0;
+      const clicavelNivel2=nivel===2;
+      const clicavel=(temSubCat||clicavelNivel2)?"":"no-drill";
+      const chevron=(temSubCat||clicavelNivel2)?`<svg class="cat-drill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>`:"";
+      let onclick="";
+      if(temSubCat) onclick=`onclick="drillState['${cid}']='${l.replace(/'/g,"\\'")}';drillState['${cid}_sub']=null;renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid||""}')"`;
+      else if(clicavelNivel2) onclick=`onclick="drillState['${cid+'_sub}']='${l.replace(/'/g,"\\'")}';renderGraficoCat('${cid}','${lid}',todosLancamentos,'${bcid||""}')"`;
       return`<div class="cat-item ${clicavel}" ${onclick}>
         <div class="cat-dot" style="background:${CORES[i%CORES.length]}"></div>
         <span class="cat-nome">${l}</span>
