@@ -1211,7 +1211,7 @@ function verificarRateio(){
   }
 }
 
-function salvar(){
+async function salvar(){
   const desc=document.getElementById("descricao").value.trim();
   const val=parseFloat(document.getElementById("valor").value);
   const data=document.getElementById("data").value;
@@ -1305,10 +1305,14 @@ function salvar(){
     };
     salvarUma(0);
   } else {
-    const descSalva=isTransf?(desc||conta+" → "+contaDestino):descFinal;
-    fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(descSalva)+"&valor="+encodeURIComponent(val)+"&categoria="+encodeURIComponent(cat)+"&conta="+encodeURIComponent(conta)+(isTransf?"&contaDestino="+encodeURIComponent(contaDestino):""))
-    .then(r=>r.json()).then(()=>{mostrarStatus("Registrado!","sucesso");setTimeout(()=>{fecharModal("modal-lanc");carregarDados();},700);document.getElementById("btn-salvar").disabled=false;})
-    .catch(()=>{mostrarStatus("Erro ao salvar.","erro");document.getElementById("btn-salvar").disabled=false;});
+    const descSalva=desc||conta+" → "+contaDestino;
+    try{
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(descSalva)+"&valor="+encodeURIComponent(val)+"&categoria=transferencia&conta="+encodeURIComponent(conta));
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(descSalva)+"&valor="+encodeURIComponent(val)+"&categoria=receita - Transferência recebida&conta="+encodeURIComponent(contaDestino));
+      mostrarStatus("Transferência registrada!","sucesso");
+      setTimeout(()=>{fecharModal("modal-lanc");carregarDados();},700);
+    }catch(e){mostrarStatus("Erro ao salvar.","erro");}
+    document.getElementById("btn-salvar").disabled=false;
   }
 }
 
@@ -1411,12 +1415,12 @@ async function confirmarEmprestimo(){
 
   const dataHoje=hoje.toISOString().split("T")[0];
 
-  // 1. Confirma o agendamento original (atualiza data para hoje)
+  // 1. Confirma o agendamento original como CRÉDITO (entrada do empréstimo)
   await fetch(SCRIPT_URL+"?action=edit&row="+empDados.rowIndex
     +"&data="+encodeURIComponent(dataHoje)
     +"&descricao="+encodeURIComponent(empDados.desc)
     +"&valor="+encodeURIComponent(empDados.val)
-    +"&categoria=empréstimo"
+    +"&categoria=receita - Empréstimo"
     +"&conta="+encodeURIComponent(empDados.conta));
 
   // 2. Salva cada uso como lançamento de despesa
