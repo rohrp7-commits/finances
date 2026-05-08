@@ -1304,12 +1304,19 @@ async function salvar(){
       .then(r=>r.json()).then(()=>salvarUma(idx+1)).catch(()=>{mostrarStatus("Erro na parcela "+(idx+1)+".","erro");document.getElementById("btn-salvar").disabled=false;});
     };
     salvarUma(0);
-  } else {
+  } else if(isTransf) {
     const descSalva=desc||conta+" → "+contaDestino;
     try{
       await fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(descSalva)+"&valor="+encodeURIComponent(val)+"&categoria=transferencia&conta="+encodeURIComponent(conta));
       await fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(descSalva)+"&valor="+encodeURIComponent(val)+"&categoria=receita - Transferência recebida&conta="+encodeURIComponent(contaDestino));
       mostrarStatus("Transferência registrada!","sucesso");
+      setTimeout(()=>{fecharModal("modal-lanc");carregarDados();},700);
+    }catch(e){mostrarStatus("Erro ao salvar.","erro");}
+    document.getElementById("btn-salvar").disabled=false;
+  } else {
+    try{
+      await fetch(SCRIPT_URL+"?data="+encodeURIComponent(data)+"&descricao="+encodeURIComponent(desc)+"&valor="+encodeURIComponent(val)+"&categoria="+encodeURIComponent(cat)+"&conta="+encodeURIComponent(conta));
+      mostrarStatus(tipoAtual==="receita"?"✓ Receita registrada!":"✓ Gasto registrado!","sucesso");
       setTimeout(()=>{fecharModal("modal-lanc");carregarDados();},700);
     }catch(e){mostrarStatus("Erro ao salvar.","erro");}
     document.getElementById("btn-salvar").disabled=false;
@@ -1560,8 +1567,9 @@ function renderTudo(){
   document.getElementById("saldo-mes-mob").textContent=fmtVal(mes);
   renderExtrato();
   if(!isMobile()){
-    document.getElementById("rc-desp").textContent=fmtVal(desp);
-    document.getElementById("rc-rec").textContent=fmtVal(rec);
+    const{desp:despMes,rec:recMes}=calcTotaisMes(todosLancamentos,heroMesSel.mes,heroMesSel.ano);
+    document.getElementById("rc-desp").textContent=fmtVal(despMes);
+    document.getElementById("rc-rec").textContent=fmtVal(recMes);
     document.getElementById("card-count").textContent=
       todosLancamentos.filter(l=>{
         if(!l.data)return false;
@@ -1687,6 +1695,10 @@ function heroClicarMes(mes,ano){
   heroMesSel={mes,ano};
   renderHeroChart();
   renderExtrato();
+  // Atualizar cards de despesas/receitas do mês selecionado
+  const{desp:despMes,rec:recMes}=calcTotaisMes(todosLancamentos,mes,ano);
+  document.getElementById("rc-desp").textContent=fmtVal(despMes);
+  document.getElementById("rc-rec").textContent=fmtVal(recMes);
   // Atualizar contador com transações do mês
   const count=todosLancamentos.filter(l=>{
     if(!l.data)return false;
